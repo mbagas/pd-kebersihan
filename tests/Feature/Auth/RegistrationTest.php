@@ -15,5 +15,6 @@ test('new users can register', function () {
     ]);
 
     $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
+    // New users default to customer role, redirect to home
+    $response->assertRedirect(route('home', absolute: false));
 });
