@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3, MapPin, Receipt, FileText } from 'lucide-react';
+import { BarChart3, Receipt, FileText } from 'lucide-react';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard Auditor', href: '/audit' }];
