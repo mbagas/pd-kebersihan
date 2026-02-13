@@ -13,11 +13,32 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // Admin User
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Admin SIM-PALD',
+            'email' => 'admin@simpald.test',
+            'role' => User::ROLE_ADMIN,
+        ]);
+
+        // Driver User
+        User::factory()->create([
+            'name' => 'Budi Driver',
+            'email' => 'driver@simpald.test',
+            'role' => User::ROLE_DRIVER,
+        ]);
+
+        // Auditor User
+        User::factory()->create([
+            'name' => 'Auditor Pemda',
+            'email' => 'auditor@simpald.test',
+            'role' => User::ROLE_AUDITOR,
+        ]);
+
+        // Customer User
+        User::factory()->create([
+            'name' => 'Pelanggan Test',
+            'email' => 'customer@simpald.test',
+            'role' => User::ROLE_CUSTOMER,
         ]);
     }
 }
