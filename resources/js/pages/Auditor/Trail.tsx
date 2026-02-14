@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import AuditorLayout from '@/layouts/AuditorLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader, EmptyState } from '@/components/shared';
 import { FileSearch } from 'lucide-react';
@@ -12,7 +12,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Trail() {
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AuditorLayout breadcrumbs={breadcrumbs}>
             <Head title="Audit Trail" />
 
             <div className="flex flex-col gap-6 p-6">
@@ -27,6 +27,6 @@ export default function Trail() {
                     </CardContent>
                 </Card>
             </div>
-        </AppLayout>
+        </AuditorLayout>
     );
 }

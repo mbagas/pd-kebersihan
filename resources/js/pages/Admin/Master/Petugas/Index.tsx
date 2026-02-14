@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import AdminLayout from '@/layouts/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { PageHeader, EmptyState } from '@/components/shared';
 import { Plus, Users } from 'lucide-react';
@@ -13,7 +13,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function PetugasIndex() {
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AdminLayout breadcrumbs={breadcrumbs}>
             <Head title="Master Petugas" />
 
             <div className="flex flex-col gap-6 p-6">
@@ -32,6 +32,6 @@ export default function PetugasIndex() {
 
                 <EmptyState icon={Users} title="Belum ada data petugas" description="Tambahkan petugas baru untuk memulai" />
             </div>
-        </AppLayout>
+        </AdminLayout>
     );
 }

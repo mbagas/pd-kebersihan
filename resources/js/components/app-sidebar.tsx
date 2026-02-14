@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Truck, Receipt, FileText, Users, Building, DollarSign, Map, History } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Truck, Receipt, FileText, Users, Building, DollarSign, Map, History, Eye } from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -12,6 +12,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { Badge } from '@/components/ui/badge';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
 
@@ -54,6 +55,7 @@ export function AppSidebar() {
     // Select nav items based on role
     const mainNavItems = userRole === 'auditor' ? auditorNavItems : adminNavItems;
     const homeUrl = userRole === 'auditor' ? '/audit' : '/admin';
+    const isAuditor = userRole === 'auditor';
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -66,6 +68,14 @@ export function AppSidebar() {
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
+                    {isAuditor && (
+                        <SidebarMenuItem>
+                            <Badge variant="secondary" className="mx-2 gap-1.5">
+                                <Eye className="h-3 w-3" />
+                                <span className="group-data-[collapsible=icon]:hidden">Read-Only</span>
+                            </Badge>
+                        </SidebarMenuItem>
+                    )}
                 </SidebarMenu>
             </SidebarHeader>
 

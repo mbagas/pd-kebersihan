@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import AdminLayout from '@/layouts/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/shared';
 import type { BreadcrumbItem } from '@/types';
@@ -11,7 +11,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Laporan() {
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AdminLayout breadcrumbs={breadcrumbs}>
             <Head title="Laporan" />
 
             <div className="flex flex-col gap-6 p-6">
@@ -26,6 +26,6 @@ export default function Laporan() {
                     </CardContent>
                 </Card>
             </div>
-        </AppLayout>
+        </AdminLayout>
     );
 }

@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import AuditorLayout from '@/layouts/AuditorLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/shared';
 import type { BreadcrumbItem } from '@/types';
@@ -11,7 +11,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Peta() {
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AuditorLayout breadcrumbs={breadcrumbs}>
             <Head title="Peta Sebaran" />
 
             <div className="flex flex-col gap-6 p-6">
@@ -26,6 +26,6 @@ export default function Peta() {
                     </CardContent>
                 </Card>
             </div>
-        </AppLayout>
+        </AuditorLayout>
     );
 }
