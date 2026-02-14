@@ -1,5 +1,19 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Truck, Receipt, FileText, Users, Building, DollarSign, Map, History, Eye } from 'lucide-react';
+import {
+    BookOpen,
+    Building,
+    DollarSign,
+    Eye,
+    FileText,
+    Folder,
+    History,
+    LayoutGrid,
+    Map,
+    Receipt,
+    Truck,
+    Users,
+    BarChart3,
+} from 'lucide-react';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -16,23 +30,48 @@ import { Badge } from '@/components/ui/badge';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
 
-// Navigation items based on user role
-const adminNavItems: NavItem[] = [
-    { title: 'Dashboard', href: '/admin', icon: LayoutGrid },
-    { title: 'Dispatch', href: '/admin/dispatch', icon: Truck },
-    { title: 'Kasir', href: '/admin/kasir', icon: Receipt },
-    { title: 'Laporan', href: '/admin/laporan', icon: FileText },
-    { title: 'Mitra', href: '/admin/master/mitra', icon: Building },
-    { title: 'Armada', href: '/admin/master/armada', icon: Truck },
-    { title: 'Tarif', href: '/admin/master/tarif', icon: DollarSign },
-    { title: 'Petugas', href: '/admin/master/petugas', icon: Users },
+// Admin navigation groups
+const adminNavGroups = [
+    {
+        label: 'Operasional',
+        items: [
+            { title: 'Dashboard', href: '/admin', icon: LayoutGrid },
+            { title: 'Dispatch', href: '/admin/dispatch', icon: Truck },
+            { title: 'Kasir', href: '/admin/kasir', icon: Receipt },
+            { title: 'Laporan', href: '/admin/laporan', icon: FileText },
+        ] as NavItem[],
+    },
+    {
+        label: 'Master Data',
+        items: [
+            { title: 'Mitra', href: '/admin/master/mitra', icon: Building },
+            { title: 'Armada', href: '/admin/master/armada', icon: Truck },
+            { title: 'Tarif', href: '/admin/master/tarif', icon: DollarSign },
+            { title: 'Petugas', href: '/admin/master/petugas', icon: Users },
+        ] as NavItem[],
+    },
+    {
+        label: 'Statistik',
+        items: [
+            { title: 'Dashboard Statistik', href: '/audit', icon: BarChart3 },
+            { title: 'Peta Sebaran', href: '/audit/peta', icon: Map },
+            { title: 'Keuangan', href: '/audit/keuangan', icon: Receipt },
+            { title: 'Audit Trail', href: '/audit/trail', icon: History },
+        ] as NavItem[],
+    },
 ];
 
-const auditorNavItems: NavItem[] = [
-    { title: 'Dashboard', href: '/audit', icon: LayoutGrid },
-    { title: 'Peta Sebaran', href: '/audit/peta', icon: Map },
-    { title: 'Keuangan', href: '/audit/keuangan', icon: Receipt },
-    { title: 'Audit Trail', href: '/audit/trail', icon: History },
+// Auditor only sees Statistik section
+const auditorNavGroups = [
+    {
+        label: 'Statistik',
+        items: [
+            { title: 'Dashboard', href: '/audit', icon: BarChart3 },
+            { title: 'Peta Sebaran', href: '/audit/peta', icon: Map },
+            { title: 'Keuangan', href: '/audit/keuangan', icon: Receipt },
+            { title: 'Audit Trail', href: '/audit/trail', icon: History },
+        ] as NavItem[],
+    },
 ];
 
 const footerNavItems: NavItem[] = [
@@ -52,10 +91,9 @@ export function AppSidebar() {
     const { auth } = usePage().props;
     const userRole = auth?.user?.role;
 
-    // Select nav items based on role
-    const mainNavItems = userRole === 'auditor' ? auditorNavItems : adminNavItems;
-    const homeUrl = userRole === 'auditor' ? '/audit' : '/admin';
     const isAuditor = userRole === 'auditor';
+    const navGroups = isAuditor ? auditorNavGroups : adminNavGroups;
+    const homeUrl = isAuditor ? '/audit' : '/admin';
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -72,7 +110,9 @@ export function AppSidebar() {
                         <SidebarMenuItem>
                             <Badge variant="secondary" className="mx-2 gap-1.5">
                                 <Eye className="h-3 w-3" />
-                                <span className="group-data-[collapsible=icon]:hidden">Read-Only</span>
+                                <span className="group-data-[collapsible=icon]:hidden">
+                                    Read-Only
+                                </span>
                             </Badge>
                         </SidebarMenuItem>
                     )}
@@ -80,7 +120,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain groups={navGroups} />
             </SidebarContent>
 
             <SidebarFooter>
