@@ -15,7 +15,15 @@ class PublicController extends Controller
 
     public function order(): Response
     {
-        return Inertia::render('Public/Order');
+        // TODO: Fetch tariff from database (Issue #16)
+        $tariff = [
+            'household' => 150000,
+            'institution' => 200000,
+        ];
+
+        return Inertia::render('Public/Order', [
+            'tariff' => $tariff,
+        ]);
     }
 
     public function storeOrder(Request $request)
