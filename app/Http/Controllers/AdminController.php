@@ -59,9 +59,8 @@ class AdminController extends Controller
         $petugas = $this->getMockPetugas();
         $armada = $this->getMockArmada();
         
-        $statuses = ['pending', 'assigned', 'processing', 'done', 'cancelled'];
-        $paymentStatuses = ['unpaid', 'paid', 'deposit_held'];
         $customerTypes = ['household', 'institution'];
+        $paymentMethods = ['cash', 'transfer'];
         
         $orders = [];
         $baseDate = now()->subDays(14);
@@ -87,14 +86,56 @@ class AdminController extends Controller
         for ($i = 1; $i <= 25; $i++) {
             $customerType = $customerTypes[array_rand($customerTypes)];
             $status = $this->weightedRandom([
-                'pending' => 25,
-                'assigned' => 20,
+                'pending' => 20,
+                'assigned' => 15,
                 'processing' => 15,
-                'done' => 35,
+                'done' => 45,
                 'cancelled' => 5,
             ]);
             
-            $paymentStatus = $status === 'done' ? 'paid' : ($status === 'cancelled' ? 'unpaid' : $paymentStatuses[array_rand($paymentStatuses)]);
+            // Payment method is chosen at order creation
+            $paymentMethod = $paymentMethods[array_rand($paymentMethods)];
+            
+            // Determine payment status and cash collection status based on order status and payment method
+            $paymentStatus = 'unpaid';
+            $cashCollectionStatus = $paymentMethod === 'cash' ? 'pending' : 'not_applicable';
+            $buktiTransfer = null;
+            $setoranId = null;
+            
+            if ($status === 'cancelled') {
+                $paymentStatus = 'unpaid';
+                $cashCollectionStatus = $paymentMethod === 'cash' ? 'pending' : 'not_applicable';
+            } elseif ($paymentMethod === 'transfer') {
+                // Transfer flow: unpaid -> pending_verification (bukti uploaded) -> paid (verified)
+                if ($status === 'done') {
+                    $paymentStatus = 'paid';
+                    $buktiTransfer = '/storage/bukti/transfer-' . $i . '.jpg';
+                } elseif (in_array($status, ['assigned', 'processing'])) {
+                    // Some have uploaded bukti, some haven't
+                    if (rand(0, 1)) {
+                        $paymentStatus = 'pending_verification';
+                        $buktiTransfer = '/storage/bukti/transfer-' . $i . '.jpg';
+                    }
+                }
+            } else {
+                // Cash flow: pending -> collected (petugas got cash) -> deposited (setor ke kasir)
+                if ($status === 'done') {
+                    // Done orders: cash either collected or deposited
+                    $cashFlow = $this->weightedRandom([
+                        'collected' => 40,  // Petugas has cash, not yet deposited
+                        'deposited' => 60,  // Already deposited to kasir
+                    ]);
+                    $cashCollectionStatus = $cashFlow;
+                    $paymentStatus = $cashFlow === 'deposited' ? 'paid' : 'unpaid';
+                    if ($cashFlow === 'deposited') {
+                        $setoranId = rand(1, 5); // Link to a setoran
+                    }
+                } elseif ($status === 'processing') {
+                    // Processing: might have collected cash already
+                    $cashCollectionStatus = rand(0, 1) ? 'collected' : 'pending';
+                }
+            }
+            
             $volume = $customerType === 'household' ? rand(2, 6) : rand(5, 15);
             $pricePerM3 = $customerType === 'household' ? 50000 : 75000;
             
@@ -107,8 +148,7 @@ class AdminController extends Controller
             if (in_array($status, ['assigned', 'processing', 'done'])) {
                 $petugasIndex = array_rand($petugas);
                 $assignedPetugas = $petugas[$petugasIndex];
-                $armadaIndex = array_rand($armada);
-                $assignedArmada = $armada[$armadaIndex];
+                $assignedArmada = $assignedPetugas['armada'] ?? null;
             }
 
             $orders[] = [
@@ -121,9 +161,12 @@ class AdminController extends Controller
                 'customer_npwp' => $customerType === 'institution' ? rand(10, 99) . '.' . rand(100, 999) . '.' . rand(100, 999) . '.' . rand(1, 9) . '-' . rand(100, 999) . '.' . rand(100, 999) : null,
                 'volume' => $volume,
                 'status' => $status,
+                'payment_method' => $paymentMethod,
                 'payment_status' => $paymentStatus,
-                'payment_method' => $paymentStatus === 'paid' ? ['cash', 'transfer'][array_rand(['cash', 'transfer'])] : null,
+                'cash_collection_status' => $cashCollectionStatus,
                 'total_amount' => $volume * $pricePerM3,
+                'bukti_transfer' => $buktiTransfer,
+                'setoran_id' => $setoranId,
                 'notes' => rand(0, 1) ? 'Catatan untuk order #' . $i : null,
                 'latitude' => -6.2 + (rand(-100, 100) / 1000),
                 'longitude' => 106.8 + (rand(-100, 100) / 1000),
@@ -135,7 +178,6 @@ class AdminController extends Controller
                 'petugas' => $assignedPetugas,
                 'armada_id' => $assignedArmada ? $assignedArmada['id'] : null,
                 'armada' => $assignedArmada,
-                'bukti_transfer' => $paymentStatus === 'paid' && rand(0, 1) ? '/storage/bukti/transfer-' . $i . '.jpg' : null,
             ];
         }
 
@@ -259,25 +301,86 @@ class AdminController extends Controller
         $orders = $this->getMockOrders();
         $petugas = $this->getMockPetugas();
         
-        // Orders with transfer proof pending verification
+        // Transfer orders pending verification
         $transferOrders = array_values(array_filter($orders, fn($o) => 
-            $o['payment_status'] === 'deposit_held' && $o['bukti_transfer']
+            $o['payment_method'] === 'transfer' && 
+            $o['payment_status'] === 'pending_verification' && 
+            $o['bukti_transfer']
         ));
         
-        // Petugas with outstanding balance
-        $petugasWithDebt = array_values(array_filter($petugas, fn($p) => $p['saldo_hutang'] > 0));
+        // Cash orders that have been collected but not deposited
+        // These are orders where petugas has the cash
+        $cashPendingDeposit = array_values(array_filter($orders, fn($o) => 
+            $o['payment_method'] === 'cash' && 
+            $o['cash_collection_status'] === 'collected'
+        ));
         
-        // Mock setoran history
+        // Group cash pending by petugas for easier setoran
+        $cashByPetugas = [];
+        foreach ($cashPendingDeposit as $order) {
+            if ($order['petugas']) {
+                $petugasId = $order['petugas']['id'];
+                if (!isset($cashByPetugas[$petugasId])) {
+                    $cashByPetugas[$petugasId] = [
+                        'petugas' => $order['petugas'],
+                        'orders' => [],
+                        'total_amount' => 0,
+                    ];
+                }
+                $cashByPetugas[$petugasId]['orders'][] = $order;
+                $cashByPetugas[$petugasId]['total_amount'] += $order['total_amount'];
+            }
+        }
+        $cashByPetugas = array_values($cashByPetugas);
+        
+        // Mock setoran history with linked orders
         $setoranHistory = [
-            ['id' => 1, 'petugas_id' => 2, 'petugas' => $petugas[1], 'jumlah' => 100000, 'tanggal' => '2026-02-15', 'keterangan' => 'Setoran tunai', 'created_at' => '2026-02-15 16:00:00'],
-            ['id' => 2, 'petugas_id' => 3, 'petugas' => $petugas[2], 'jumlah' => 50000, 'tanggal' => '2026-02-14', 'keterangan' => 'Setoran tunai', 'created_at' => '2026-02-14 11:00:00'],
-            ['id' => 3, 'petugas_id' => 5, 'petugas' => $petugas[4], 'jumlah' => 150000, 'tanggal' => '2026-02-13', 'keterangan' => 'Setoran tunai', 'created_at' => '2026-02-13 14:30:00'],
+            [
+                'id' => 1, 
+                'petugas_id' => 2, 
+                'petugas' => $petugas[1], 
+                'jumlah' => 250000, 
+                'tanggal' => '2026-02-15', 
+                'keterangan' => 'Setoran 2 order tunai',
+                'order_count' => 2,
+                'created_at' => '2026-02-15 16:00:00'
+            ],
+            [
+                'id' => 2, 
+                'petugas_id' => 3, 
+                'petugas' => $petugas[2], 
+                'jumlah' => 150000, 
+                'tanggal' => '2026-02-14', 
+                'keterangan' => 'Setoran 1 order tunai',
+                'order_count' => 1,
+                'created_at' => '2026-02-14 11:00:00'
+            ],
+            [
+                'id' => 3, 
+                'petugas_id' => 5, 
+                'petugas' => $petugas[4], 
+                'jumlah' => 300000, 
+                'tanggal' => '2026-02-13', 
+                'keterangan' => 'Setoran 3 order tunai',
+                'order_count' => 3,
+                'created_at' => '2026-02-13 14:30:00'
+            ],
         ];
+
+        // Calculate totals
+        $totalPendingTransfer = array_sum(array_map(fn($o) => $o['total_amount'], $transferOrders));
+        $totalPendingCash = array_sum(array_map(fn($o) => $o['total_amount'], $cashPendingDeposit));
 
         return Inertia::render('Admin/Kasir', [
             'transferOrders' => $transferOrders,
-            'petugasWithDebt' => $petugasWithDebt,
+            'cashByPetugas' => $cashByPetugas,
             'setoranHistory' => $setoranHistory,
+            'summary' => [
+                'pending_transfer_count' => count($transferOrders),
+                'pending_transfer_amount' => $totalPendingTransfer,
+                'pending_cash_count' => count($cashPendingDeposit),
+                'pending_cash_amount' => $totalPendingCash,
+            ],
         ]);
     }
 

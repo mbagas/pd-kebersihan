@@ -1,13 +1,15 @@
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 import {
+    Banknote,
     Check,
+    ChevronDown,
+    ChevronUp,
     CreditCard,
-    Eye,
     History,
     Image,
+    Receipt,
     User,
-    Wallet,
     X,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -17,6 +19,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
     Dialog,
     DialogContent,
     DialogDescription,
@@ -24,21 +31,43 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AdminLayout from '@/layouts/AdminLayout';
-import type { BreadcrumbItem, DispatchOrder, Petugas, Setoran } from '@/types';
+import type { BreadcrumbItem, DispatchOrder, Petugas } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/admin' },
     { title: 'Kasir', href: '/admin/kasir' },
 ];
 
+interface CashByPetugas {
+    petugas: Petugas;
+    orders: DispatchOrder[];
+    total_amount: number;
+}
+
+interface SetoranHistory {
+    id: number;
+    petugas_id: number;
+    petugas: Petugas;
+    jumlah: number;
+    tanggal: string;
+    keterangan: string;
+    order_count: number;
+    created_at: string;
+}
+
 interface Props {
     transferOrders: DispatchOrder[];
-    petugasWithDebt: Petugas[];
-    setoranHistory: Setoran[];
+    cashByPetugas: CashByPetugas[];
+    setoranHistory: SetoranHistory[];
+    summary: {
+        pending_transfer_count: number;
+        pending_transfer_amount: number;
+        pending_cash_count: number;
+        pending_cash_amount: number;
+    };
 }
 
 function formatCurrency(amount: number): string {
@@ -61,8 +90,9 @@ function formatDate(dateString: string): string {
 
 export default function Kasir({
     transferOrders,
-    petugasWithDebt,
+    cashByPetugas,
     setoranHistory,
+    summary,
 }: Props) {
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [confirmApprove, setConfirmApprove] = useState<DispatchOrder | null>(
@@ -71,9 +101,19 @@ export default function Kasir({
     const [confirmReject, setConfirmReject] = useState<DispatchOrder | null>(
         null,
     );
-    const [setoranModal, setSetoranModal] = useState<Petugas | null>(null);
-    const [setoranAmount, setSetoranAmount] = useState('');
+    const [confirmSetoran, setConfirmSetoran] = useState<CashByPetugas | null>(
+        null,
+    );
     const [processing, setProcessing] = useState(false);
+    const [expandedPetugas, setExpandedPetugas] = useState<number[]>([]);
+
+    const toggleExpanded = (petugasId: number) => {
+        setExpandedPetugas((prev) =>
+            prev.includes(petugasId)
+                ? prev.filter((id) => id !== petugasId)
+                : [...prev, petugasId],
+        );
+    };
 
     const handleApprove = () => {
         if (!confirmApprove) return;
@@ -98,24 +138,14 @@ export default function Kasir({
     };
 
     const handleSetoran = () => {
-        if (!setoranModal || !setoranAmount) return;
-        const amount = parseInt(setoranAmount);
-        if (isNaN(amount) || amount <= 0) {
-            toast.error('Masukkan jumlah yang valid');
-            return;
-        }
-        if (amount > setoranModal.saldo_hutang) {
-            toast.error('Jumlah melebihi saldo hutang');
-            return;
-        }
+        if (!confirmSetoran) return;
         setProcessing(true);
         setTimeout(() => {
             toast.success(
-                `Setoran ${formatCurrency(amount)} dari ${setoranModal.nama} berhasil diterima`,
+                `Setoran ${formatCurrency(confirmSetoran.total_amount)} dari ${confirmSetoran.petugas.nama} berhasil diterima (${confirmSetoran.orders.length} order)`,
             );
             setProcessing(false);
-            setSetoranModal(null);
-            setSetoranAmount('');
+            setConfirmSetoran(null);
         }, 1000);
     };
 
@@ -196,58 +226,7 @@ export default function Kasir({
         },
     ];
 
-    const petugasColumns: Column<Petugas>[] = [
-        {
-            key: 'nama',
-            header: 'Petugas',
-            render: (petugas) => (
-                <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                        <User className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                        <p className="font-medium">{petugas.nama}</p>
-                        <p className="text-xs text-muted-foreground">
-                            {petugas.mitra?.nama}
-                        </p>
-                    </div>
-                </div>
-            ),
-        },
-        {
-            key: 'kontak',
-            header: 'Kontak',
-            render: (petugas) => (
-                <span className="text-sm">{petugas.kontak}</span>
-            ),
-        },
-        {
-            key: 'saldo_hutang',
-            header: 'Saldo Hutang',
-            render: (petugas) => (
-                <span className="font-medium text-red-600">
-                    {formatCurrency(petugas.saldo_hutang)}
-                </span>
-            ),
-        },
-        {
-            key: 'actions',
-            header: 'Aksi',
-            className: 'text-right',
-            render: (petugas) => (
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSetoranModal(petugas)}
-                >
-                    <Wallet className="mr-1 h-4 w-4" />
-                    Terima Setoran
-                </Button>
-            ),
-        },
-    ];
-
-    const historyColumns: Column<Setoran>[] = [
+    const historyColumns: Column<SetoranHistory>[] = [
         {
             key: 'tanggal',
             header: 'Tanggal',
@@ -268,8 +247,15 @@ export default function Kasir({
             ),
         },
         {
+            key: 'order_count',
+            header: 'Jumlah Order',
+            render: (setoran) => (
+                <Badge variant="secondary">{setoran.order_count} order</Badge>
+            ),
+        },
+        {
             key: 'jumlah',
-            header: 'Jumlah',
+            header: 'Total',
             render: (setoran) => (
                 <span className="font-medium text-green-600">
                     {formatCurrency(setoran.jumlah)}
@@ -287,8 +273,6 @@ export default function Kasir({
         },
     ];
 
-    const totalDebt = petugasWithDebt.reduce((sum, p) => sum + p.saldo_hutang, 0);
-
     return (
         <AdminLayout breadcrumbs={breadcrumbs}>
             <Head title="Kasir" />
@@ -296,47 +280,75 @@ export default function Kasir({
             <div className="flex flex-col gap-6 p-6">
                 <PageHeader
                     title="Kasir / Settlement"
-                    description="Verifikasi pembayaran dan kelola setoran petugas"
+                    description="Verifikasi pembayaran transfer dan terima setoran tunai dari petugas"
                 />
 
                 {/* Summary Cards */}
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
                                 Transfer Pending
                             </CardTitle>
-                            <CreditCard className="h-4 w-4 text-muted-foreground" />
+                            <CreditCard className="h-4 w-4 text-blue-600" />
                         </CardHeader>
                         <CardContent>
                             <p className="text-2xl font-bold">
-                                {transferOrders.length}
+                                {summary.pending_transfer_count}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                                {formatCurrency(summary.pending_transfer_amount)}
                             </p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Total Hutang Petugas
+                                Cash Belum Disetor
                             </CardTitle>
-                            <Wallet className="h-4 w-4 text-muted-foreground" />
+                            <Banknote className="h-4 w-4 text-orange-600" />
                         </CardHeader>
                         <CardContent>
-                            <p className="text-2xl font-bold text-red-600">
-                                {formatCurrency(totalDebt)}
+                            <p className="text-2xl font-bold text-orange-600">
+                                {summary.pending_cash_count}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                                {formatCurrency(summary.pending_cash_amount)}
                             </p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">
-                                Petugas dengan Hutang
+                                Petugas dengan Cash
                             </CardTitle>
                             <User className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <p className="text-2xl font-bold">
-                                {petugasWithDebt.length}
+                                {cashByPetugas.length}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                                perlu setor
+                            </p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                                Total Pending
+                            </CardTitle>
+                            <Receipt className="h-4 w-4 text-red-600" />
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-2xl font-bold text-red-600">
+                                {formatCurrency(
+                                    summary.pending_transfer_amount +
+                                        summary.pending_cash_amount,
+                                )}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                                belum masuk kas
                             </p>
                         </CardContent>
                     </Card>
@@ -354,12 +366,12 @@ export default function Kasir({
                                 </Badge>
                             )}
                         </TabsTrigger>
-                        <TabsTrigger value="setoran" className="gap-2">
-                            <Wallet className="h-4 w-4" />
+                        <TabsTrigger value="cash" className="gap-2">
+                            <Banknote className="h-4 w-4" />
                             Setoran Tunai
-                            {petugasWithDebt.length > 0 && (
+                            {cashByPetugas.length > 0 && (
                                 <Badge variant="secondary" className="ml-1">
-                                    {petugasWithDebt.length}
+                                    {cashByPetugas.length}
                                 </Badge>
                             )}
                         </TabsTrigger>
@@ -370,33 +382,179 @@ export default function Kasir({
                     </TabsList>
 
                     <TabsContent value="transfer" className="mt-4">
-                        <DataTable
-                            data={transferOrders}
-                            columns={transferColumns}
-                            keyExtractor={(order) => order.id}
-                            emptyTitle="Tidak ada transfer pending"
-                            emptyDescription="Semua transfer sudah diverifikasi"
-                        />
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-base">
+                                    Transfer Menunggu Verifikasi
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <DataTable
+                                    data={transferOrders}
+                                    columns={transferColumns}
+                                    keyExtractor={(order) => order.id}
+                                    emptyTitle="Tidak ada transfer pending"
+                                    emptyDescription="Semua transfer sudah diverifikasi"
+                                />
+                            </CardContent>
+                        </Card>
                     </TabsContent>
 
-                    <TabsContent value="setoran" className="mt-4">
-                        <DataTable
-                            data={petugasWithDebt}
-                            columns={petugasColumns}
-                            keyExtractor={(petugas) => petugas.id}
-                            emptyTitle="Tidak ada hutang"
-                            emptyDescription="Semua petugas tidak memiliki saldo hutang"
-                        />
+                    <TabsContent value="cash" className="mt-4 space-y-4">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-base">
+                                    Cash yang Perlu Disetor
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {cashByPetugas.length === 0 ? (
+                                    <div className="py-8 text-center">
+                                        <Banknote className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+                                        <p className="text-muted-foreground">
+                                            Tidak ada cash yang perlu disetor
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {cashByPetugas.map((item) => (
+                                            <Collapsible
+                                                key={item.petugas.id}
+                                                open={expandedPetugas.includes(
+                                                    item.petugas.id,
+                                                )}
+                                                onOpenChange={() =>
+                                                    toggleExpanded(
+                                                        item.petugas.id,
+                                                    )
+                                                }
+                                            >
+                                                <div className="rounded-lg border">
+                                                    <CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-muted/50">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100">
+                                                                <User className="h-5 w-5 text-orange-600" />
+                                                            </div>
+                                                            <div className="text-left">
+                                                                <p className="font-medium">
+                                                                    {
+                                                                        item
+                                                                            .petugas
+                                                                            .nama
+                                                                    }
+                                                                </p>
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    {
+                                                                        item
+                                                                            .petugas
+                                                                            .mitra
+                                                                            ?.nama
+                                                                    }{' '}
+                                                                    •{' '}
+                                                                    {
+                                                                        item
+                                                                            .orders
+                                                                            .length
+                                                                    }{' '}
+                                                                    order
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="text-right">
+                                                                <p className="text-lg font-bold text-orange-600">
+                                                                    {formatCurrency(
+                                                                        item.total_amount,
+                                                                    )}
+                                                                </p>
+                                                            </div>
+                                                            {expandedPetugas.includes(
+                                                                item.petugas.id,
+                                                            ) ? (
+                                                                <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                                                            ) : (
+                                                                <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                                                            )}
+                                                        </div>
+                                                    </CollapsibleTrigger>
+                                                    <CollapsibleContent>
+                                                        <Separator />
+                                                        <div className="p-4">
+                                                            <p className="mb-3 text-sm font-medium text-muted-foreground">
+                                                                Detail Order
+                                                            </p>
+                                                            <div className="space-y-2">
+                                                                {item.orders.map(
+                                                                    (order) => (
+                                                                        <div
+                                                                            key={
+                                                                                order.id
+                                                                            }
+                                                                            className="flex items-center justify-between rounded-md bg-muted p-3"
+                                                                        >
+                                                                            <div>
+                                                                                <p className="font-mono text-sm">
+                                                                                    {
+                                                                                        order.order_number
+                                                                                    }
+                                                                                </p>
+                                                                                <p className="text-xs text-muted-foreground">
+                                                                                    {
+                                                                                        order.customer_name
+                                                                                    }
+                                                                                </p>
+                                                                            </div>
+                                                                            <p className="font-medium">
+                                                                                {formatCurrency(
+                                                                                    order.total_amount,
+                                                                                )}
+                                                                            </p>
+                                                                        </div>
+                                                                    ),
+                                                                )}
+                                                            </div>
+                                                            <Button
+                                                                className="mt-4 w-full"
+                                                                onClick={() =>
+                                                                    setConfirmSetoran(
+                                                                        item,
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Banknote className="mr-2 h-4 w-4" />
+                                                                Terima Setoran{' '}
+                                                                {formatCurrency(
+                                                                    item.total_amount,
+                                                                )}
+                                                            </Button>
+                                                        </div>
+                                                    </CollapsibleContent>
+                                                </div>
+                                            </Collapsible>
+                                        ))}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
                     </TabsContent>
 
                     <TabsContent value="history" className="mt-4">
-                        <DataTable
-                            data={setoranHistory}
-                            columns={historyColumns}
-                            keyExtractor={(setoran) => setoran.id}
-                            emptyTitle="Belum ada riwayat"
-                            emptyDescription="Belum ada setoran yang tercatat"
-                        />
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-base">
+                                    Riwayat Setoran
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <DataTable
+                                    data={setoranHistory}
+                                    columns={historyColumns}
+                                    keyExtractor={(setoran) => setoran.id}
+                                    emptyTitle="Belum ada riwayat"
+                                    emptyDescription="Belum ada setoran yang tercatat"
+                                />
+                            </CardContent>
+                        </Card>
                     </TabsContent>
                 </Tabs>
             </div>
@@ -430,7 +588,7 @@ export default function Kasir({
                 open={!!confirmApprove}
                 onOpenChange={() => setConfirmApprove(null)}
                 title="Verifikasi Transfer"
-                description={`Apakah Anda yakin ingin memverifikasi transfer untuk order ${confirmApprove?.order_number}?`}
+                description={`Apakah Anda yakin transfer untuk order ${confirmApprove?.order_number} sebesar ${confirmApprove ? formatCurrency(confirmApprove.total_amount) : ''} sudah valid?`}
                 confirmLabel="Approve"
                 onConfirm={handleApprove}
                 loading={processing}
@@ -441,77 +599,80 @@ export default function Kasir({
                 open={!!confirmReject}
                 onOpenChange={() => setConfirmReject(null)}
                 title="Tolak Transfer"
-                description={`Apakah Anda yakin ingin menolak transfer untuk order ${confirmReject?.order_number}?`}
+                description={`Apakah Anda yakin ingin menolak transfer untuk order ${confirmReject?.order_number}? Customer akan diminta upload ulang bukti transfer.`}
                 confirmLabel="Tolak"
                 variant="destructive"
                 onConfirm={handleReject}
                 loading={processing}
             />
 
-            {/* Setoran Modal */}
+            {/* Setoran Confirmation */}
             <Dialog
-                open={!!setoranModal}
-                onOpenChange={() => {
-                    setSetoranModal(null);
-                    setSetoranAmount('');
-                }}
+                open={!!confirmSetoran}
+                onOpenChange={() => setConfirmSetoran(null)}
             >
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Terima Setoran</DialogTitle>
+                        <DialogTitle>Konfirmasi Setoran</DialogTitle>
                         <DialogDescription>
-                            Masukkan jumlah setoran dari {setoranModal?.nama}
+                            Pastikan Anda sudah menerima uang tunai dari petugas
                         </DialogDescription>
                     </DialogHeader>
-                    {setoranModal && (
+                    {confirmSetoran && (
                         <div className="space-y-4 py-4">
-                            <div className="rounded-lg bg-muted p-3">
+                            <div className="flex items-center gap-3 rounded-lg bg-muted p-4">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-100">
+                                    <User className="h-6 w-6 text-orange-600" />
+                                </div>
+                                <div>
+                                    <p className="font-medium">
+                                        {confirmSetoran.petugas.nama}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {confirmSetoran.petugas.mitra?.nama}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="rounded-lg border p-4">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-muted-foreground">
-                                        Saldo Hutang
+                                    <span className="text-muted-foreground">
+                                        Jumlah Order
                                     </span>
-                                    <span className="font-medium text-red-600">
-                                        {formatCurrency(setoranModal.saldo_hutang)}
+                                    <span className="font-medium">
+                                        {confirmSetoran.orders.length} order
+                                    </span>
+                                </div>
+                                <Separator className="my-3" />
+                                <div className="flex items-center justify-between">
+                                    <span className="text-muted-foreground">
+                                        Total Setoran
+                                    </span>
+                                    <span className="text-xl font-bold text-green-600">
+                                        {formatCurrency(
+                                            confirmSetoran.total_amount,
+                                        )}
                                     </span>
                                 </div>
                             </div>
-                            <div className="space-y-2">
-                                <Label>Jumlah Setoran</Label>
-                                <Input
-                                    type="number"
-                                    placeholder="Masukkan jumlah"
-                                    value={setoranAmount}
-                                    onChange={(e) =>
-                                        setSetoranAmount(e.target.value)
-                                    }
-                                    max={setoranModal.saldo_hutang}
-                                />
-                            </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                    setSetoranAmount(
-                                        setoranModal.saldo_hutang.toString(),
-                                    )
-                                }
-                            >
-                                Lunas Semua
-                            </Button>
+                            <p className="text-sm text-muted-foreground">
+                                Dengan menekan tombol konfirmasi, Anda menyatakan
+                                telah menerima uang tunai sebesar{' '}
+                                <span className="font-medium">
+                                    {formatCurrency(confirmSetoran.total_amount)}
+                                </span>{' '}
+                                dari {confirmSetoran.petugas.nama}.
+                            </p>
                         </div>
                     )}
                     <DialogFooter>
                         <Button
                             variant="outline"
-                            onClick={() => {
-                                setSetoranModal(null);
-                                setSetoranAmount('');
-                            }}
+                            onClick={() => setConfirmSetoran(null)}
                         >
                             Batal
                         </Button>
                         <Button onClick={handleSetoran} disabled={processing}>
-                            {processing ? 'Memproses...' : 'Terima Setoran'}
+                            {processing ? 'Memproses...' : 'Konfirmasi Terima'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
