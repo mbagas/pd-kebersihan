@@ -1,8 +1,8 @@
 import { Head, usePage } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { BarChart3, Receipt, FileText, Eye } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Statistik', href: '/audit' }];
@@ -25,7 +25,9 @@ export default function AuditDashboard() {
             <div className="flex flex-col gap-6 p-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold">Dashboard Statistik</h1>
+                        <h1 className="text-2xl font-bold">
+                            Dashboard Statistik
+                        </h1>
                         <p className="text-muted-foreground">
                             Monitoring kinerja dan statistik operasional
                         </p>
@@ -50,7 +52,9 @@ export default function AuditDashboard() {
                                     <Icon className="h-5 w-5 text-muted-foreground" />
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-2xl font-bold">{stat.value}</p>
+                                    <p className="text-2xl font-bold">
+                                        {stat.value}
+                                    </p>
                                 </CardContent>
                             </Card>
                         );

@@ -14,7 +14,13 @@ interface NavGroupProps {
     items: NavItem[];
 }
 
-export function NavMain({ items = [], groups = [] }: { items?: NavItem[]; groups?: NavGroupProps[] }) {
+export function NavMain({
+    items = [],
+    groups = [],
+}: {
+    items?: NavItem[];
+    groups?: NavGroupProps[];
+}) {
     const { isCurrentUrl } = useCurrentUrl();
 
     const renderItems = (navItems: NavItem[]) => (

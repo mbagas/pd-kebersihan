@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface LoadingSpinnerProps {
     size?: 'sm' | 'md' | 'lg';
@@ -13,10 +13,21 @@ const sizeClasses = {
     lg: 'h-8 w-8',
 };
 
-export function LoadingSpinner({ size = 'md', className, label = 'Memuat...' }: LoadingSpinnerProps) {
+export function LoadingSpinner({
+    size = 'md',
+    className,
+    label = 'Memuat...',
+}: LoadingSpinnerProps) {
     return (
-        <div className={cn('flex items-center justify-center gap-2', className)} role="status" aria-label={label}>
-            <Loader2 className={cn('animate-spin text-primary', sizeClasses[size])} aria-hidden="true" />
+        <div
+            className={cn('flex items-center justify-center gap-2', className)}
+            role="status"
+            aria-label={label}
+        >
+            <Loader2
+                className={cn('animate-spin text-primary', sizeClasses[size])}
+                aria-hidden="true"
+            />
             <span className="sr-only">{label}</span>
         </div>
     );

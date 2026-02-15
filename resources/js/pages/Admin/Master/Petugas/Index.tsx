@@ -1,8 +1,8 @@
 import { Head, Link } from '@inertiajs/react';
-import AdminLayout from '@/layouts/AdminLayout';
-import { Button } from '@/components/ui/button';
-import { PageHeader, EmptyState } from '@/components/shared';
 import { Plus, Users } from 'lucide-react';
+import { PageHeader, EmptyState } from '@/components/shared';
+import { Button } from '@/components/ui/button';
+import AdminLayout from '@/layouts/AdminLayout';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -30,7 +30,11 @@ export default function PetugasIndex() {
                     }
                 />
 
-                <EmptyState icon={Users} title="Belum ada data petugas" description="Tambahkan petugas baru untuk memulai" />
+                <EmptyState
+                    icon={Users}
+                    title="Belum ada data petugas"
+                    description="Tambahkan petugas baru untuk memulai"
+                />
             </div>
         </AdminLayout>
     );

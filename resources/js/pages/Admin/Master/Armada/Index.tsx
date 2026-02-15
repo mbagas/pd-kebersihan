@@ -1,8 +1,8 @@
 import { Head, Link } from '@inertiajs/react';
-import AdminLayout from '@/layouts/AdminLayout';
-import { Button } from '@/components/ui/button';
-import { PageHeader, EmptyState } from '@/components/shared';
 import { Plus, Truck } from 'lucide-react';
+import { PageHeader, EmptyState } from '@/components/shared';
+import { Button } from '@/components/ui/button';
+import AdminLayout from '@/layouts/AdminLayout';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -30,7 +30,11 @@ export default function ArmadaIndex() {
                     }
                 />
 
-                <EmptyState icon={Truck} title="Belum ada data armada" description="Tambahkan armada baru untuk memulai" />
+                <EmptyState
+                    icon={Truck}
+                    title="Belum ada data armada"
+                    description="Tambahkan armada baru untuk memulai"
+                />
             </div>
         </AdminLayout>
     );

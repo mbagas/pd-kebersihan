@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
-import DriverLayout from '@/layouts/DriverLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import DriverLayout from '@/layouts/DriverLayout';
 
 interface Props {
     id: string;
@@ -19,7 +19,9 @@ export default function TugasShow({ id }: Props) {
                         <CardTitle>Informasi Order</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">Detail tugas akan ditampilkan di sini.</p>
+                        <p className="text-muted-foreground">
+                            Detail tugas akan ditampilkan di sini.
+                        </p>
                     </CardContent>
                 </Card>
             </div>

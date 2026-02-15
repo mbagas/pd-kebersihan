@@ -28,7 +28,8 @@ export const PAYMENT_STATUS = {
     DEPOSIT_HELD: 'deposit_held',
 } as const;
 
-export type PaymentStatus = (typeof PAYMENT_STATUS)[keyof typeof PAYMENT_STATUS];
+export type PaymentStatus =
+    (typeof PAYMENT_STATUS)[keyof typeof PAYMENT_STATUS];
 
 export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
     [PAYMENT_STATUS.UNPAID]: 'Belum Bayar',

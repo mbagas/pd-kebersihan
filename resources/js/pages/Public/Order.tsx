@@ -1,9 +1,23 @@
-import PublicLayout from '@/layouts/PublicLayout';
 import { Head } from '@inertiajs/react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { OrderForm } from '@/components/forms';
 import { PageHeader } from '@/components/shared';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import PublicLayout from '@/layouts/PublicLayout';
 
-export default function Order() {
+interface OrderPageProps {
+    tariff?: {
+        household: number;
+        institution: number;
+    };
+}
+
+export default function Order({ tariff }: OrderPageProps) {
     return (
         <PublicLayout>
             <Head title="Pesan Layanan" />
@@ -12,17 +26,21 @@ export default function Order() {
                 <PageHeader
                     title="Pesan Layanan Sedot Tinja"
                     description="Isi formulir di bawah untuk memesan layanan"
-                    breadcrumbs={[{ label: 'Beranda', href: '/' }, { label: 'Pesan Layanan' }]}
+                    breadcrumbs={[
+                        { label: 'Beranda', href: '/' },
+                        { label: 'Pesan Layanan' },
+                    ]}
                 />
 
                 <Card className="mt-8">
                     <CardHeader>
                         <CardTitle>Formulir Pemesanan</CardTitle>
-                        <CardDescription>Lengkapi data di bawah ini untuk melakukan pemesanan</CardDescription>
+                        <CardDescription>
+                            Lengkapi data di bawah ini untuk melakukan pemesanan
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {/* TODO: Implement order form */}
-                        <p className="text-muted-foreground">Form pemesanan akan diimplementasikan di issue berikutnya.</p>
+                        <OrderForm tariff={tariff} submitUrl="/order" />
                     </CardContent>
                 </Card>
             </div>

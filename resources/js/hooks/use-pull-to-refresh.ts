@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { router } from '@inertiajs/react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UsePullToRefreshOptions {
     threshold?: number;
@@ -14,7 +14,7 @@ interface UsePullToRefreshReturn {
 }
 
 export function usePullToRefresh(
-    options: UsePullToRefreshOptions = {}
+    options: UsePullToRefreshOptions = {},
 ): UsePullToRefreshReturn {
     const { threshold = 80, onRefresh } = options;
     const containerRef = useRef<HTMLDivElement>(null);
@@ -53,10 +53,10 @@ export function usePullToRefresh(
 
         const handleTouchMove = (e: TouchEvent) => {
             if (!isPulling || isRefreshing) return;
-            
+
             currentY.current = e.touches[0].clientY;
             const distance = Math.max(0, currentY.current - startY.current);
-            
+
             if (distance > 0 && container.scrollTop === 0) {
                 e.preventDefault();
                 setPullDistance(Math.min(distance * 0.5, threshold * 1.5));
@@ -65,9 +65,9 @@ export function usePullToRefresh(
 
         const handleTouchEnd = () => {
             if (!isPulling) return;
-            
+
             setIsPulling(false);
-            
+
             if (pullDistance >= threshold && !isRefreshing) {
                 handleRefresh();
             } else {
@@ -75,9 +75,15 @@ export function usePullToRefresh(
             }
         };
 
-        container.addEventListener('touchstart', handleTouchStart, { passive: true });
-        container.addEventListener('touchmove', handleTouchMove, { passive: false });
-        container.addEventListener('touchend', handleTouchEnd, { passive: true });
+        container.addEventListener('touchstart', handleTouchStart, {
+            passive: true,
+        });
+        container.addEventListener('touchmove', handleTouchMove, {
+            passive: false,
+        });
+        container.addEventListener('touchend', handleTouchEnd, {
+            passive: true,
+        });
 
         return () => {
             container.removeEventListener('touchstart', handleTouchStart);

@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react';
-import AdminLayout from '@/layouts/AdminLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/shared';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AdminLayout from '@/layouts/AdminLayout';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -15,14 +15,19 @@ export default function Kasir() {
             <Head title="Kasir" />
 
             <div className="flex flex-col gap-6 p-6">
-                <PageHeader title="Kasir" description="Kelola pembayaran dan setoran petugas" />
+                <PageHeader
+                    title="Kasir"
+                    description="Kelola pembayaran dan setoran petugas"
+                />
 
                 <Card>
                     <CardHeader>
                         <CardTitle>Setoran Pending</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">Belum ada setoran yang perlu diverifikasi.</p>
+                        <p className="text-muted-foreground">
+                            Belum ada setoran yang perlu diverifikasi.
+                        </p>
                     </CardContent>
                 </Card>
             </div>

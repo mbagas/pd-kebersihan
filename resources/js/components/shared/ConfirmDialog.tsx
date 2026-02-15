@@ -39,14 +39,23 @@ export function ConfirmDialog({
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>{title}</AlertDialogTitle>
-                    {description && <AlertDialogDescription>{description}</AlertDialogDescription>}
+                    {description && (
+                        <AlertDialogDescription>
+                            {description}
+                        </AlertDialogDescription>
+                    )}
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel disabled={loading}>{cancelLabel}</AlertDialogCancel>
+                    <AlertDialogCancel disabled={loading}>
+                        {cancelLabel}
+                    </AlertDialogCancel>
                     <AlertDialogAction
                         onClick={onConfirm}
                         disabled={loading}
-                        className={cn(variant === 'destructive' && buttonVariants({ variant: 'destructive' }))}
+                        className={cn(
+                            variant === 'destructive' &&
+                                buttonVariants({ variant: 'destructive' }),
+                        )}
                     >
                         {loading ? 'Memproses...' : confirmLabel}
                     </AlertDialogAction>

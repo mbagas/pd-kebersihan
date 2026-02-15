@@ -51,9 +51,9 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
     const { auth } = page.props;
     const getInitials = useInitials();
     const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
-    
+
     const dashboardUrl = getDashboardUrl(auth?.user?.role);
-    
+
     const mainNavItems: NavItem[] = [
         {
             title: 'Dashboard',
