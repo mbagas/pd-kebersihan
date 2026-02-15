@@ -1,9 +1,22 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+    ArrowDown,
+    ArrowUp,
+    ArrowUpDown,
+    ChevronLeft,
+    ChevronRight,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { EmptyState } from './EmptyState';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { EmptyState } from './EmptyState';
 
 export interface Column<T> {
     key: string;
@@ -40,11 +53,21 @@ interface DataTableProps<T> {
     onRowClick?: (item: T) => void;
 }
 
-function SortIcon({ sortKey, sortConfig }: { sortKey: string; sortConfig?: SortConfig }) {
+function SortIcon({
+    sortKey,
+    sortConfig,
+}: {
+    sortKey: string;
+    sortConfig?: SortConfig;
+}) {
     if (!sortConfig || sortConfig.key !== sortKey) {
         return <ArrowUpDown className="ml-1 h-4 w-4" />;
     }
-    return sortConfig.direction === 'asc' ? <ArrowUp className="ml-1 h-4 w-4" /> : <ArrowDown className="ml-1 h-4 w-4" />;
+    return sortConfig.direction === 'asc' ? (
+        <ArrowUp className="ml-1 h-4 w-4" />
+    ) : (
+        <ArrowDown className="ml-1 h-4 w-4" />
+    );
 }
 
 export function DataTable<T>({
@@ -67,7 +90,10 @@ export function DataTable<T>({
                     <TableHeader>
                         <TableRow>
                             {columns.map((col) => (
-                                <TableHead key={col.key} className={col.className}>
+                                <TableHead
+                                    key={col.key}
+                                    className={col.className}
+                                >
                                     {col.header}
                                 </TableHead>
                             ))}
@@ -90,7 +116,13 @@ export function DataTable<T>({
     }
 
     if (data.length === 0) {
-        return <EmptyState title={emptyTitle} description={emptyDescription} className={className} />;
+        return (
+            <EmptyState
+                title={emptyTitle}
+                description={emptyDescription}
+                className={className}
+            />
+        );
     }
 
     return (
@@ -100,7 +132,10 @@ export function DataTable<T>({
                     <TableHeader>
                         <TableRow>
                             {columns.map((col) => (
-                                <TableHead key={col.key} className={col.className}>
+                                <TableHead
+                                    key={col.key}
+                                    className={col.className}
+                                >
                                     {col.sortable && onSort ? (
                                         <Button
                                             variant="ghost"
@@ -109,7 +144,10 @@ export function DataTable<T>({
                                             onClick={() => onSort(col.key)}
                                         >
                                             {col.header}
-                                            <SortIcon sortKey={col.key} sortConfig={sortConfig} />
+                                            <SortIcon
+                                                sortKey={col.key}
+                                                sortConfig={sortConfig}
+                                            />
                                         </Button>
                                     ) : (
                                         col.header
@@ -122,12 +160,22 @@ export function DataTable<T>({
                         {data.map((item) => (
                             <TableRow
                                 key={keyExtractor(item)}
-                                className={cn(onRowClick && 'cursor-pointer hover:bg-muted/50')}
+                                className={cn(
+                                    onRowClick &&
+                                        'cursor-pointer hover:bg-muted/50',
+                                )}
                                 onClick={() => onRowClick?.(item)}
                             >
                                 {columns.map((col) => (
-                                    <TableCell key={col.key} className={col.className}>
-                                        {col.render ? col.render(item) : (item as Record<string, unknown>)[col.key]?.toString()}
+                                    <TableCell
+                                        key={col.key}
+                                        className={col.className}
+                                    >
+                                        {col.render
+                                            ? col.render(item)
+                                            : (item as Record<string, unknown>)[
+                                                  col.key
+                                              ]?.toString()}
                                     </TableCell>
                                 ))}
                             </TableRow>
@@ -139,14 +187,24 @@ export function DataTable<T>({
             {pagination && pagination.totalPages > 1 && (
                 <div className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">
-                        Menampilkan {(pagination.currentPage - 1) * pagination.perPage + 1} -{' '}
-                        {Math.min(pagination.currentPage * pagination.perPage, pagination.totalItems)} dari {pagination.totalItems} data
+                        Menampilkan{' '}
+                        {(pagination.currentPage - 1) * pagination.perPage + 1}{' '}
+                        -{' '}
+                        {Math.min(
+                            pagination.currentPage * pagination.perPage,
+                            pagination.totalItems,
+                        )}{' '}
+                        dari {pagination.totalItems} data
                     </p>
                     <div className="flex items-center gap-2">
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
+                            onClick={() =>
+                                pagination.onPageChange(
+                                    pagination.currentPage - 1,
+                                )
+                            }
                             disabled={pagination.currentPage <= 1}
                         >
                             <ChevronLeft className="h-4 w-4" />
@@ -158,8 +216,14 @@ export function DataTable<T>({
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
-                            disabled={pagination.currentPage >= pagination.totalPages}
+                            onClick={() =>
+                                pagination.onPageChange(
+                                    pagination.currentPage + 1,
+                                )
+                            }
+                            disabled={
+                                pagination.currentPage >= pagination.totalPages
+                            }
                         >
                             <ChevronRight className="h-4 w-4" />
                             <span className="sr-only">Halaman berikutnya</span>

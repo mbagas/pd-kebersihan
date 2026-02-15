@@ -1,17 +1,32 @@
 import { Head } from '@inertiajs/react';
-import AdminLayout from '@/layouts/AdminLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ClipboardList, Truck, Users, Wallet } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AdminLayout from '@/layouts/AdminLayout';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: '/admin' }];
 
 export default function Dashboard() {
     const stats = [
-        { title: 'Order Hari Ini', value: '0', icon: ClipboardList, color: 'text-primary' },
-        { title: 'Armada Aktif', value: '0', icon: Truck, color: 'text-success' },
+        {
+            title: 'Order Hari Ini',
+            value: '0',
+            icon: ClipboardList,
+            color: 'text-primary',
+        },
+        {
+            title: 'Armada Aktif',
+            value: '0',
+            icon: Truck,
+            color: 'text-success',
+        },
         { title: 'Petugas', value: '0', icon: Users, color: 'text-accent' },
-        { title: 'Pendapatan', value: 'Rp 0', icon: Wallet, color: 'text-warning' },
+        {
+            title: 'Pendapatan',
+            value: 'Rp 0',
+            icon: Wallet,
+            color: 'text-warning',
+        },
     ];
 
     return (
@@ -27,11 +42,15 @@ export default function Dashboard() {
                         return (
                             <Card key={stat.title}>
                                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                    <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
+                                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                                        {stat.title}
+                                    </CardTitle>
                                     <Icon className={`h-5 w-5 ${stat.color}`} />
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-2xl font-bold">{stat.value}</p>
+                                    <p className="text-2xl font-bold">
+                                        {stat.value}
+                                    </p>
                                 </CardContent>
                             </Card>
                         );
@@ -43,7 +62,9 @@ export default function Dashboard() {
                         <CardTitle>Order Terbaru</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-muted-foreground">Belum ada order.</p>
+                        <p className="text-muted-foreground">
+                            Belum ada order.
+                        </p>
                     </CardContent>
                 </Card>
             </div>

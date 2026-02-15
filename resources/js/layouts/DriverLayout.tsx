@@ -1,10 +1,18 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ClipboardList, History, Loader2, LogOut, User, Wifi, WifiOff } from 'lucide-react';
-import { PropsWithChildren } from 'react';
-import { cn } from '@/lib/utils';
+import {
+    ClipboardList,
+    History,
+    Loader2,
+    LogOut,
+    User,
+    Wifi,
+    WifiOff,
+} from 'lucide-react';
+import type { PropsWithChildren } from 'react';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useOnlineStatus } from '@/hooks/use-online-status';
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
+import { cn } from '@/lib/utils';
 
 const navItems = [
     { href: '/app/tugas', label: 'Tugas', icon: ClipboardList },
@@ -34,7 +42,7 @@ export default function DriverLayout({ children }: PropsWithChildren) {
                                 'flex items-center gap-1.5 rounded-full px-2 py-1 text-xs',
                                 isOnline
                                     ? 'bg-green-500/20 text-green-100'
-                                    : 'bg-red-500/20 text-red-100'
+                                    : 'bg-red-500/20 text-red-100',
                             )}
                         >
                             {isOnline ? (
@@ -49,7 +57,9 @@ export default function DriverLayout({ children }: PropsWithChildren) {
                                 </>
                             )}
                         </div>
-                        <span className="text-sm opacity-90">{auth.user?.name}</span>
+                        <span className="text-sm opacity-90">
+                            {auth.user?.name}
+                        </span>
                     </div>
                 </div>
             </header>
@@ -58,7 +68,9 @@ export default function DriverLayout({ children }: PropsWithChildren) {
             <div
                 className={cn(
                     'flex items-center justify-center overflow-hidden bg-muted transition-all duration-200',
-                    pullDistance > 0 || isRefreshing ? 'opacity-100' : 'opacity-0'
+                    pullDistance > 0 || isRefreshing
+                        ? 'opacity-100'
+                        : 'opacity-0',
                 )}
                 style={{ height: isRefreshing ? 48 : pullDistance }}
             >
@@ -70,7 +82,9 @@ export default function DriverLayout({ children }: PropsWithChildren) {
                         </>
                     ) : (
                         <span>
-                            {pullDistance >= 80 ? 'Lepaskan untuk refresh' : 'Tarik untuk refresh'}
+                            {pullDistance >= 80
+                                ? 'Lepaskan untuk refresh'
+                                : 'Tarik untuk refresh'}
                         </span>
                     )}
                 </div>
@@ -81,7 +95,8 @@ export default function DriverLayout({ children }: PropsWithChildren) {
                 ref={containerRef}
                 className="flex-1 overflow-auto"
                 style={{
-                    paddingBottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))',
+                    paddingBottom:
+                        'calc(4rem + env(safe-area-inset-bottom, 0px))',
                 }}
             >
                 {children}
@@ -89,7 +104,7 @@ export default function DriverLayout({ children }: PropsWithChildren) {
 
             {/* Bottom Navigation with safe area */}
             <nav
-                className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background"
+                className="fixed right-0 bottom-0 left-0 z-50 border-t bg-background"
                 style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
             >
                 <div className="flex h-16 items-center justify-around">
@@ -102,7 +117,9 @@ export default function DriverLayout({ children }: PropsWithChildren) {
                                 href={item.href}
                                 className={cn(
                                     'flex flex-col items-center gap-1 px-4 py-2 transition-colors',
-                                    isActive ? 'text-primary' : 'text-muted-foreground'
+                                    isActive
+                                        ? 'text-primary'
+                                        : 'text-muted-foreground',
                                 )}
                             >
                                 <Icon className="h-5 w-5" />

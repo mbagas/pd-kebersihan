@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { Menu } from 'lucide-react';
-import { PropsWithChildren, useState } from 'react';
+import type { PropsWithChildren } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
     Sheet,
@@ -8,8 +9,8 @@ import {
     SheetHeader,
     SheetTitle,
 } from '@/components/ui/sheet';
-import { cn } from '@/lib/utils';
 import { useCurrentUrl } from '@/hooks/use-current-url';
+import { cn } from '@/lib/utils';
 
 const navItems = [
     { href: '/', label: 'Beranda' },
@@ -43,7 +44,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                     'text-sm font-medium transition-colors hover:text-foreground',
                                     isCurrentUrl(item.href)
                                         ? 'text-foreground'
-                                        : 'text-muted-foreground'
+                                        : 'text-muted-foreground',
                                 )}
                             >
                                 {item.label}
@@ -91,7 +92,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                     'rounded-md px-3 py-2 text-sm font-medium transition-colors',
                                     isCurrentUrl(item.href)
                                         ? 'bg-accent text-accent-foreground'
-                                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
                                 )}
                             >
                                 {item.label}

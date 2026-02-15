@@ -1,6 +1,10 @@
-import { PARTNER_TYPE, PARTNER_TYPE_LABELS, type PartnerType } from '@/types/order';
-import { cn } from '@/lib/utils';
 import { Building, Truck } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+    PARTNER_TYPE,
+    PARTNER_TYPE_LABELS,
+    type PartnerType,
+} from '@/types/order';
 
 interface PartnerLabelProps {
     type: PartnerType;
@@ -19,11 +23,22 @@ const partnerTypeColors: Record<PartnerType, string> = {
     [PARTNER_TYPE.CV_SWASTA]: 'text-accent-foreground',
 };
 
-export function PartnerLabel({ type, name, className, showIcon = true }: PartnerLabelProps) {
+export function PartnerLabel({
+    type,
+    name,
+    className,
+    showIcon = true,
+}: PartnerLabelProps) {
     const displayName = name || PARTNER_TYPE_LABELS[type];
 
     return (
-        <span className={cn('inline-flex items-center text-sm font-medium', partnerTypeColors[type], className)}>
+        <span
+            className={cn(
+                'inline-flex items-center text-sm font-medium',
+                partnerTypeColors[type],
+                className,
+            )}
+        >
             {showIcon && partnerTypeIcons[type]}
             {displayName}
         </span>

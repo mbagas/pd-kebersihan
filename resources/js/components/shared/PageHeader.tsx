@@ -1,7 +1,14 @@
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { cn } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
 import { Fragment } from 'react';
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { cn } from '@/lib/utils';
 
 export interface BreadcrumbItemType {
     label: string;
@@ -16,7 +23,13 @@ interface PageHeaderProps {
     className?: string;
 }
 
-export function PageHeader({ title, description, breadcrumbs, actions, className }: PageHeaderProps) {
+export function PageHeader({
+    title,
+    description,
+    breadcrumbs,
+    actions,
+    className,
+}: PageHeaderProps) {
     return (
         <div className={cn('space-y-2', className)}>
             {breadcrumbs && breadcrumbs.length > 0 && (
@@ -27,13 +40,19 @@ export function PageHeader({ title, description, breadcrumbs, actions, className
                                 <BreadcrumbItem>
                                     {item.href ? (
                                         <BreadcrumbLink asChild>
-                                            <Link href={item.href}>{item.label}</Link>
+                                            <Link href={item.href}>
+                                                {item.label}
+                                            </Link>
                                         </BreadcrumbLink>
                                     ) : (
-                                        <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                                        <BreadcrumbPage>
+                                            {item.label}
+                                        </BreadcrumbPage>
                                     )}
                                 </BreadcrumbItem>
-                                {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
+                                {index < breadcrumbs.length - 1 && (
+                                    <BreadcrumbSeparator />
+                                )}
                             </Fragment>
                         ))}
                     </BreadcrumbList>
@@ -41,10 +60,16 @@ export function PageHeader({ title, description, breadcrumbs, actions, className
             )}
             <div className="flex items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-                    {description && <p className="text-muted-foreground">{description}</p>}
+                    <h1 className="text-2xl font-bold tracking-tight">
+                        {title}
+                    </h1>
+                    {description && (
+                        <p className="text-muted-foreground">{description}</p>
+                    )}
                 </div>
-                {actions && <div className="flex items-center gap-2">{actions}</div>}
+                {actions && (
+                    <div className="flex items-center gap-2">{actions}</div>
+                )}
             </div>
         </div>
     );

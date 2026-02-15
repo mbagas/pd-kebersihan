@@ -6,5 +6,10 @@ export { OrderCard } from './OrderCard';
 export { EmptyState } from './EmptyState';
 export { LoadingSpinner } from './LoadingSpinner';
 export { PageHeader, type BreadcrumbItemType } from './PageHeader';
-export { DataTable, type Column, type SortConfig, type PaginationConfig } from './DataTable';
+export {
+    DataTable,
+    type Column,
+    type SortConfig,
+    type PaginationConfig,
+} from './DataTable';
 export { ConfirmDialog } from './ConfirmDialog';
