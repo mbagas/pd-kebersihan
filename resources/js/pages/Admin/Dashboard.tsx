@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
+import AdminLayout from '@/layouts/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ClipboardList, Truck, Users, Wallet } from 'lucide-react';
 import type { BreadcrumbItem } from '@/types';
@@ -15,7 +15,7 @@ export default function Dashboard() {
     ];
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AdminLayout breadcrumbs={breadcrumbs}>
             <Head title="Admin Dashboard" />
 
             <div className="flex flex-col gap-6 p-6">
@@ -47,6 +47,6 @@ export default function Dashboard() {
                     </CardContent>
                 </Card>
             </div>
-        </AppLayout>
+        </AdminLayout>
     );
 }

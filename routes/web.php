@@ -52,14 +52,14 @@ Route::prefix('app')->middleware(['auth', 'verified', 'role:driver'])->group(fun
 
 /*
 |--------------------------------------------------------------------------
-| Auditor Routes
+| Audit Routes (Admin & Auditor can access)
 |--------------------------------------------------------------------------
 */
-Route::prefix('audit')->middleware(['auth', 'verified', 'role:auditor'])->group(function () {
-    Route::get('/', [AuditorController::class, 'dashboard'])->name('auditor.dashboard');
-    Route::get('/peta', [AuditorController::class, 'peta'])->name('auditor.peta');
-    Route::get('/keuangan', [AuditorController::class, 'keuangan'])->name('auditor.keuangan');
-    Route::get('/trail', [AuditorController::class, 'trail'])->name('auditor.trail');
+Route::prefix('audit')->middleware(['auth', 'verified', 'role:admin,auditor'])->group(function () {
+    Route::get('/', [AuditorController::class, 'dashboard'])->name('audit.dashboard');
+    Route::get('/peta', [AuditorController::class, 'peta'])->name('audit.peta');
+    Route::get('/keuangan', [AuditorController::class, 'keuangan'])->name('audit.keuangan');
+    Route::get('/trail', [AuditorController::class, 'trail'])->name('audit.trail');
 });
 
 /*

@@ -10,21 +10,21 @@ class AuditorController extends Controller
 {
     public function dashboard(): Response
     {
-        return Inertia::render('Auditor/Dashboard');
+        return Inertia::render('Audit/Dashboard');
     }
 
     public function peta(): Response
     {
-        return Inertia::render('Auditor/Peta');
+        return Inertia::render('Audit/Peta');
     }
 
     public function keuangan(): Response
     {
-        return Inertia::render('Auditor/Keuangan');
+        return Inertia::render('Audit/Keuangan');
     }
 
     public function trail(): Response
     {
-        return Inertia::render('Auditor/Trail');
+        return Inertia::render('Audit/Trail');
     }
 }

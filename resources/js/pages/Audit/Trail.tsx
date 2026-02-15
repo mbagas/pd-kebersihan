@@ -6,7 +6,7 @@ import { FileSearch } from 'lucide-react';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/audit' },
+    { title: 'Statistik', href: '/audit' },
     { title: 'Audit Trail', href: '/audit/trail' },
 ];
 
@@ -16,14 +16,21 @@ export default function Trail() {
             <Head title="Audit Trail" />
 
             <div className="flex flex-col gap-6 p-6">
-                <PageHeader title="Audit Trail" description="Riwayat aktivitas dan perubahan data" />
+                <PageHeader
+                    title="Audit Trail"
+                    description="Riwayat aktivitas dan perubahan data"
+                />
 
                 <Card>
                     <CardHeader>
                         <CardTitle>Log Aktivitas</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <EmptyState icon={FileSearch} title="Belum ada log" description="Log aktivitas akan muncul di sini" />
+                        <EmptyState
+                            icon={FileSearch}
+                            title="Belum ada log"
+                            description="Log aktivitas akan muncul di sini"
+                        />
                     </CardContent>
                 </Card>
             </div>
