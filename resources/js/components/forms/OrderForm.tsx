@@ -1,10 +1,11 @@
 import { useForm } from '@inertiajs/react';
+import { Banknote, CreditCard } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import type { FormEvent } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
+import { cn } from '@/lib/utils';
 import { CUSTOMER_TYPE } from '@/types/order';
 import type { CustomerType } from '@/types/order';
 import { AddressInput } from './AddressInput';
@@ -22,6 +23,8 @@ interface MapLocation {
     address?: string;
 }
 
+type PaymentMethod = 'cod' | 'transfer';
+
 interface OrderFormData {
     customer_type: CustomerType;
     name: string;
@@ -34,6 +37,7 @@ interface OrderFormData {
     business_type: string;
     estimated_volume: number;
     has_grease_trap: boolean;
+    payment_method: PaymentMethod;
     notes: string;
 }
 
@@ -52,6 +56,21 @@ const DEFAULT_TARIFF: Tariff = {
     household: 150000,
     institution: 200000,
 };
+
+const PAYMENT_OPTIONS = [
+    {
+        value: 'cod' as PaymentMethod,
+        label: 'Bayar di Tempat (COD)',
+        description: 'Bayar tunai saat petugas datang',
+        icon: Banknote,
+    },
+    {
+        value: 'transfer' as PaymentMethod,
+        label: 'Transfer Bank',
+        description: 'Transfer sebelum atau setelah layanan',
+        icon: CreditCard,
+    },
+] as const;
 
 export function OrderForm({
     tariff = DEFAULT_TARIFF,
@@ -73,6 +92,7 @@ export function OrderForm({
         business_type: '',
         estimated_volume: 0,
         has_grease_trap: false,
+        payment_method: 'cod',
         notes: '',
     });
 
@@ -95,7 +115,7 @@ export function OrderForm({
         }
     };
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         form.post(submitUrl, {
             onSuccess: () => {
@@ -301,6 +321,76 @@ export function OrderForm({
                     </FormField>
                 </FormSection>
             )}
+
+            <FormSection
+                title="Metode Pembayaran"
+                description="Pilih cara pembayaran yang Anda inginkan"
+            >
+                <div
+                    className="grid gap-3 sm:grid-cols-2"
+                    role="radiogroup"
+                    aria-label="Pilih metode pembayaran"
+                >
+                    {PAYMENT_OPTIONS.map((option) => {
+                        const isSelected =
+                            form.data.payment_method === option.value;
+                        const Icon = option.icon;
+
+                        return (
+                            <label
+                                key={option.value}
+                                className={cn(
+                                    'relative flex cursor-pointer flex-col rounded-lg border-2 p-4 transition-all',
+                                    'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:border-primary/50',
+                                    isSelected
+                                        ? 'border-primary bg-primary/5'
+                                        : 'border-muted',
+                                    form.processing &&
+                                        'cursor-not-allowed opacity-50',
+                                )}
+                            >
+                                <input
+                                    type="radio"
+                                    name="payment_method"
+                                    value={option.value}
+                                    checked={isSelected}
+                                    onChange={() =>
+                                        form.setData(
+                                            'payment_method',
+                                            option.value,
+                                        )
+                                    }
+                                    disabled={form.processing}
+                                    className="sr-only"
+                                />
+                                <div className="flex items-center gap-3">
+                                    <div
+                                        className={cn(
+                                            'flex h-10 w-10 items-center justify-center rounded-full',
+                                            isSelected
+                                                ? 'bg-primary text-primary-foreground'
+                                                : 'bg-muted',
+                                        )}
+                                    >
+                                        <Icon className="h-5 w-5" />
+                                    </div>
+                                    <div>
+                                        <p className="font-medium">
+                                            {option.label}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {option.description}
+                                        </p>
+                                    </div>
+                                </div>
+                                {isSelected && (
+                                    <div className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />
+                                )}
+                            </label>
+                        );
+                    })}
+                </div>
+            </FormSection>
 
             <FormSection title="Catatan Tambahan">
                 <FormField
