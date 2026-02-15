@@ -9,41 +9,23 @@ use Inertia\Response;
 
 class TarifController extends Controller
 {
+    private function getMockTarif(): array
+    {
+        return [
+            ['id' => 1, 'tipe_customer' => 'household', 'harga_per_m3' => 50000, 'keterangan' => 'Tarif rumah tangga standar', 'created_at' => '2026-01-01 08:00:00', 'updated_at' => '2026-01-01 08:00:00'],
+            ['id' => 2, 'tipe_customer' => 'institution', 'harga_per_m3' => 75000, 'keterangan' => 'Tarif instansi/perusahaan', 'created_at' => '2026-01-01 08:00:00', 'updated_at' => '2026-01-01 08:00:00'],
+        ];
+    }
+
     public function index(): Response
     {
-        return Inertia::render('Admin/Master/Tarif/Index');
-    }
-
-    public function create(): Response
-    {
-        return Inertia::render('Admin/Master/Tarif/Create');
-    }
-
-    public function store(Request $request)
-    {
-        // TODO: Implement store logic
-        return redirect()->route('admin.tarif.index')->with('success', 'Tarif berhasil ditambahkan');
-    }
-
-    public function show(string $id): Response
-    {
-        return Inertia::render('Admin/Master/Tarif/Show', ['id' => $id]);
-    }
-
-    public function edit(string $id): Response
-    {
-        return Inertia::render('Admin/Master/Tarif/Edit', ['id' => $id]);
+        return Inertia::render('Admin/Master/Tarif/Index', [
+            'tarif' => $this->getMockTarif(),
+        ]);
     }
 
     public function update(Request $request, string $id)
     {
-        // TODO: Implement update logic
         return redirect()->route('admin.tarif.index')->with('success', 'Tarif berhasil diperbarui');
-    }
-
-    public function destroy(string $id)
-    {
-        // TODO: Implement delete logic
-        return redirect()->route('admin.tarif.index')->with('success', 'Tarif berhasil dihapus');
     }
 }
