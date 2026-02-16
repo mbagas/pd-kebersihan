@@ -1,7 +1,8 @@
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import {
-    Calendar,
+    Banknote,
+    CreditCard,
     ExternalLink,
     Eye,
     Filter,
@@ -14,7 +15,7 @@ import {
     UserPlus,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { ConfirmDialog, DataTable, PageHeader } from '@/components/shared';
+import { DataTable, PageHeader } from '@/components/shared';
 import type { Column, PaginationConfig } from '@/components/shared/DataTable';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -104,6 +105,59 @@ function formatDate(dateString: string): string {
 
 function getGoogleMapsUrl(lat: number, lng: number): string {
     return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+}
+
+// Get payment settlement status badge
+function getPaymentSettlementBadge(order: DispatchOrder) {
+    if (order.payment_method === 'transfer') {
+        // Transfer flow
+        if (order.payment_status === 'paid') {
+            return (
+                <Badge className="bg-green-100 text-green-800">
+                    <CreditCard className="mr-1 h-3 w-3" />
+                    Terverifikasi
+                </Badge>
+            );
+        }
+        if (order.payment_status === 'pending_verification') {
+            return (
+                <Badge className="bg-yellow-100 text-yellow-800">
+                    <CreditCard className="mr-1 h-3 w-3" />
+                    Menunggu Verifikasi
+                </Badge>
+            );
+        }
+        return (
+            <Badge className="bg-gray-100 text-gray-800">
+                <CreditCard className="mr-1 h-3 w-3" />
+                Belum Bayar
+            </Badge>
+        );
+    } else {
+        // Cash flow
+        if (order.cash_collection_status === 'deposited') {
+            return (
+                <Badge className="bg-green-100 text-green-800">
+                    <Banknote className="mr-1 h-3 w-3" />
+                    Sudah Disetor
+                </Badge>
+            );
+        }
+        if (order.cash_collection_status === 'collected') {
+            return (
+                <Badge className="bg-orange-100 text-orange-800">
+                    <Banknote className="mr-1 h-3 w-3" />
+                    Belum Disetor
+                </Badge>
+            );
+        }
+        return (
+            <Badge className="bg-gray-100 text-gray-800">
+                <Banknote className="mr-1 h-3 w-3" />
+                Belum Ditagih
+            </Badge>
+        );
+    }
 }
 
 // Mini Map Component for Sheet
@@ -280,6 +334,11 @@ export default function Dispatch({ orders, petugas, filters }: Props) {
                     {STATUS_LABELS[order.status]}
                 </Badge>
             ),
+        },
+        {
+            key: 'payment_settlement',
+            header: 'Pembayaran',
+            render: (order) => getPaymentSettlementBadge(order),
         },
         {
             key: 'petugas',
@@ -708,19 +767,26 @@ export default function Dispatch({ orders, petugas, filters }: Props) {
                                                 : '-'}
                                         </p>
                                     </div>
-                                    <div className="rounded-lg bg-muted p-3">
-                                        <p className="text-sm text-muted-foreground">
-                                            Pembayaran
-                                        </p>
-                                        <p className="font-medium">
-                                            {selectedOrder.payment_status ===
-                                            'paid'
-                                                ? 'Lunas'
-                                                : selectedOrder.payment_status ===
-                                                    'deposit_held'
-                                                  ? 'Deposit'
-                                                  : 'Belum Bayar'}
-                                        </p>
+                                </div>
+                            </div>
+
+                            {/* Payment Settlement Status */}
+                            <Separator />
+                            <div className="space-y-4">
+                                <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                                    Status Pembayaran
+                                </h4>
+                                <div className="rounded-lg border p-4">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">
+                                                Metode Pembayaran
+                                            </p>
+                                            <p className="font-medium">
+                                                {selectedOrder.payment_method === 'transfer' ? 'Transfer' : 'Tunai'}
+                                            </p>
+                                        </div>
+                                        {getPaymentSettlementBadge(selectedOrder)}
                                     </div>
                                 </div>
                             </div>

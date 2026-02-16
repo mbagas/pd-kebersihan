@@ -3,9 +3,8 @@ import { useState } from 'react';
 import {
     Banknote,
     Check,
-    ChevronDown,
-    ChevronUp,
     CreditCard,
+    Eye,
     History,
     Image,
     Receipt,
@@ -18,11 +17,6 @@ import type { Column } from '@/components/shared/DataTable';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
-} from '@/components/ui/collapsible';
 import {
     Dialog,
     DialogContent,
@@ -105,15 +99,6 @@ export default function Kasir({
         null,
     );
     const [processing, setProcessing] = useState(false);
-    const [expandedPetugas, setExpandedPetugas] = useState<number[]>([]);
-
-    const toggleExpanded = (petugasId: number) => {
-        setExpandedPetugas((prev) =>
-            prev.includes(petugasId)
-                ? prev.filter((id) => id !== petugasId)
-                : [...prev, petugasId],
-        );
-    };
 
     const handleApprove = () => {
         if (!confirmApprove) return;
@@ -273,6 +258,58 @@ export default function Kasir({
         },
     ];
 
+    const cashColumns: Column<CashByPetugas>[] = [
+        {
+            key: 'petugas',
+            header: 'Petugas',
+            render: (item) => (
+                <span className="font-medium">{item.petugas.nama}</span>
+            ),
+        },
+        {
+            key: 'mitra',
+            header: 'Mitra',
+            render: (item) => (
+                <span className="text-muted-foreground">
+                    {item.petugas.mitra?.nama || '-'}
+                </span>
+            ),
+        },
+        {
+            key: 'order_count',
+            header: 'Jumlah Order',
+            render: (item) => (
+                <Badge variant="secondary">{item.orders.length} order</Badge>
+            ),
+        },
+        {
+            key: 'total_amount',
+            header: 'Total',
+            render: (item) => (
+                <span className="font-medium text-orange-600">
+                    {formatCurrency(item.total_amount)}
+                </span>
+            ),
+        },
+        {
+            key: 'actions',
+            header: 'Aksi',
+            className: 'text-right',
+            render: (item) => (
+                <div className="flex justify-end">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setConfirmSetoran(item)}
+                    >
+                        <Eye className="mr-1 h-4 w-4" />
+                        Detail & Setor
+                    </Button>
+                </div>
+            ),
+        },
+    ];
+
     return (
         <AdminLayout breadcrumbs={breadcrumbs}>
             <Head title="Kasir" />
@@ -400,7 +437,7 @@ export default function Kasir({
                         </Card>
                     </TabsContent>
 
-                    <TabsContent value="cash" className="mt-4 space-y-4">
+                    <TabsContent value="cash" className="mt-4">
                         <Card>
                             <CardHeader>
                                 <CardTitle className="text-base">
@@ -408,132 +445,13 @@ export default function Kasir({
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                {cashByPetugas.length === 0 ? (
-                                    <div className="py-8 text-center">
-                                        <Banknote className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-                                        <p className="text-muted-foreground">
-                                            Tidak ada cash yang perlu disetor
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {cashByPetugas.map((item) => (
-                                            <Collapsible
-                                                key={item.petugas.id}
-                                                open={expandedPetugas.includes(
-                                                    item.petugas.id,
-                                                )}
-                                                onOpenChange={() =>
-                                                    toggleExpanded(
-                                                        item.petugas.id,
-                                                    )
-                                                }
-                                            >
-                                                <div className="rounded-lg border">
-                                                    <CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-muted/50">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100">
-                                                                <User className="h-5 w-5 text-orange-600" />
-                                                            </div>
-                                                            <div className="text-left">
-                                                                <p className="font-medium">
-                                                                    {
-                                                                        item
-                                                                            .petugas
-                                                                            .nama
-                                                                    }
-                                                                </p>
-                                                                <p className="text-sm text-muted-foreground">
-                                                                    {
-                                                                        item
-                                                                            .petugas
-                                                                            .mitra
-                                                                            ?.nama
-                                                                    }{' '}
-                                                                    •{' '}
-                                                                    {
-                                                                        item
-                                                                            .orders
-                                                                            .length
-                                                                    }{' '}
-                                                                    order
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="text-right">
-                                                                <p className="text-lg font-bold text-orange-600">
-                                                                    {formatCurrency(
-                                                                        item.total_amount,
-                                                                    )}
-                                                                </p>
-                                                            </div>
-                                                            {expandedPetugas.includes(
-                                                                item.petugas.id,
-                                                            ) ? (
-                                                                <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                                                            ) : (
-                                                                <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                                                            )}
-                                                        </div>
-                                                    </CollapsibleTrigger>
-                                                    <CollapsibleContent>
-                                                        <Separator />
-                                                        <div className="p-4">
-                                                            <p className="mb-3 text-sm font-medium text-muted-foreground">
-                                                                Detail Order
-                                                            </p>
-                                                            <div className="space-y-2">
-                                                                {item.orders.map(
-                                                                    (order) => (
-                                                                        <div
-                                                                            key={
-                                                                                order.id
-                                                                            }
-                                                                            className="flex items-center justify-between rounded-md bg-muted p-3"
-                                                                        >
-                                                                            <div>
-                                                                                <p className="font-mono text-sm">
-                                                                                    {
-                                                                                        order.order_number
-                                                                                    }
-                                                                                </p>
-                                                                                <p className="text-xs text-muted-foreground">
-                                                                                    {
-                                                                                        order.customer_name
-                                                                                    }
-                                                                                </p>
-                                                                            </div>
-                                                                            <p className="font-medium">
-                                                                                {formatCurrency(
-                                                                                    order.total_amount,
-                                                                                )}
-                                                                            </p>
-                                                                        </div>
-                                                                    ),
-                                                                )}
-                                                            </div>
-                                                            <Button
-                                                                className="mt-4 w-full"
-                                                                onClick={() =>
-                                                                    setConfirmSetoran(
-                                                                        item,
-                                                                    )
-                                                                }
-                                                            >
-                                                                <Banknote className="mr-2 h-4 w-4" />
-                                                                Terima Setoran{' '}
-                                                                {formatCurrency(
-                                                                    item.total_amount,
-                                                                )}
-                                                            </Button>
-                                                        </div>
-                                                    </CollapsibleContent>
-                                                </div>
-                                            </Collapsible>
-                                        ))}
-                                    </div>
-                                )}
+                                <DataTable
+                                    data={cashByPetugas}
+                                    columns={cashColumns}
+                                    keyExtractor={(item) => item.petugas.id}
+                                    emptyTitle="Tidak ada cash yang perlu disetor"
+                                    emptyDescription="Semua setoran tunai sudah diterima"
+                                />
                             </CardContent>
                         </Card>
                     </TabsContent>
@@ -611,7 +529,7 @@ export default function Kasir({
                 open={!!confirmSetoran}
                 onOpenChange={() => setConfirmSetoran(null)}
             >
-                <DialogContent>
+                <DialogContent className="max-w-lg">
                     <DialogHeader>
                         <DialogTitle>Konfirmasi Setoran</DialogTitle>
                         <DialogDescription>
@@ -633,24 +551,37 @@ export default function Kasir({
                                     </p>
                                 </div>
                             </div>
-                            <div className="rounded-lg border p-4">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-muted-foreground">
-                                        Jumlah Order
-                                    </span>
-                                    <span className="font-medium">
-                                        {confirmSetoran.orders.length} order
-                                    </span>
+                            <div className="rounded-lg border">
+                                <div className="border-b p-3">
+                                    <p className="text-sm font-medium">
+                                        Detail Order ({confirmSetoran.orders.length})
+                                    </p>
                                 </div>
-                                <Separator className="my-3" />
-                                <div className="flex items-center justify-between">
-                                    <span className="text-muted-foreground">
-                                        Total Setoran
-                                    </span>
-                                    <span className="text-xl font-bold text-green-600">
-                                        {formatCurrency(
-                                            confirmSetoran.total_amount,
-                                        )}
+                                <div className="max-h-48 overflow-y-auto">
+                                    {confirmSetoran.orders.map((order) => (
+                                        <div
+                                            key={order.id}
+                                            className="flex items-center justify-between border-b p-3 last:border-b-0"
+                                        >
+                                            <div>
+                                                <p className="font-mono text-sm">
+                                                    {order.order_number}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {order.customer_name}
+                                                </p>
+                                            </div>
+                                            <p className="font-medium">
+                                                {formatCurrency(order.total_amount)}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                                <Separator />
+                                <div className="flex items-center justify-between p-3">
+                                    <span className="font-medium">Total Setoran</span>
+                                    <span className="text-lg font-bold text-green-600">
+                                        {formatCurrency(confirmSetoran.total_amount)}
                                     </span>
                                 </div>
                             </div>
