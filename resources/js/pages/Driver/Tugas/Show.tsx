@@ -163,7 +163,7 @@ export default function TugasShow({ task, tarif, armadaKapasitas }: Props) {
             case DRIVER_ORDER_STATUS.ASSIGNED:
                 return (
                     <Button
-                        className="w-full h-12 text-base"
+                        className="w-full h-14 text-base font-semibold"
                         onClick={() => handleStatusUpdate(DRIVER_ORDER_STATUS.ON_THE_WAY)}
                     >
                         <Play className="mr-2 h-5 w-5" />
@@ -173,7 +173,7 @@ export default function TugasShow({ task, tarif, armadaKapasitas }: Props) {
             case DRIVER_ORDER_STATUS.ON_THE_WAY:
                 return (
                     <Button
-                        className="w-full h-12 text-base"
+                        className="w-full h-14 text-base font-semibold"
                         onClick={() => handleStatusUpdate(DRIVER_ORDER_STATUS.ARRIVED)}
                     >
                         <MapPin className="mr-2 h-5 w-5" />
@@ -197,74 +197,88 @@ export default function TugasShow({ task, tarif, armadaKapasitas }: Props) {
             <Head title={`Tugas ${task.order_number}`} />
 
             <div className="flex flex-col min-h-full">
-                {/* Header */}
-                <div className="sticky top-14 z-40 bg-background border-b px-4 py-3">
-                    <div className="flex items-center gap-3">
+                {/* Header - Compact for mobile */}
+                <div className="sticky top-14 z-40 bg-background border-b">
+                    <div className="flex items-center gap-3 px-4 py-3">
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-9 w-9 shrink-0"
+                            className="h-10 w-10 shrink-0 -ml-2"
                             onClick={() => router.visit('/app/tugas')}
                         >
                             <ArrowLeft className="h-5 w-5" />
                         </Button>
                         <div className="min-w-0 flex-1">
-                            <p className="text-sm text-muted-foreground">
-                                {task.order_number}
-                            </p>
-                            <Badge
-                                className={cn(
-                                    'mt-1',
-                                    DRIVER_ORDER_STATUS_COLORS[task.status],
-                                )}
-                            >
-                                {DRIVER_ORDER_STATUS_LABELS[task.status]}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                                <Badge
+                                    className={cn(
+                                        'text-xs',
+                                        DRIVER_ORDER_STATUS_COLORS[task.status],
+                                    )}
+                                >
+                                    {DRIVER_ORDER_STATUS_LABELS[task.status]}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">
+                                    {task.order_number}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 p-4 space-y-4 pb-32">
-                    {/* Customer Info */}
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-base flex items-center gap-2">
+                {/* Content - Better spacing for mobile */}
+                <div className="flex-1 px-4 py-4 space-y-4 pb-36">
+                    {/* Customer Info Card */}
+                    <Card className="overflow-hidden">
+                        <CardHeader className="pb-3 pt-4 px-4">
+                            <CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
                                 <User className="h-4 w-4" />
                                 Informasi Customer
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <span className="font-semibold text-lg">
+                        <CardContent className="px-4 pb-4 space-y-4">
+                            {/* Customer name & type */}
+                            <div className="flex items-start justify-between gap-2">
+                                <h2 className="font-semibold text-lg leading-tight">
                                     {task.customer_name}
-                                </span>
-                                <Badge variant="outline">
+                                </h2>
+                                <Badge variant="outline" className="shrink-0 text-xs">
                                     {CUSTOMER_TYPE_LABELS[task.customer_type]}
                                 </Badge>
                             </div>
 
-                            <div className="flex items-start gap-2 text-sm">
-                                <MapPin className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
-                                <span>{task.customer_address}</span>
+                            {/* Address */}
+                            <div className="flex items-start gap-3">
+                                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-xs text-muted-foreground mb-0.5">Alamat</p>
+                                    <p className="text-sm leading-snug">{task.customer_address}</p>
+                                </div>
                             </div>
 
-                            <div className="flex items-center gap-2 text-sm">
-                                <Phone className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                <a
-                                    href={`tel:${task.customer_phone}`}
-                                    className="text-primary underline"
-                                >
-                                    {task.customer_phone}
-                                </a>
+                            {/* Phone */}
+                            <div className="flex items-start gap-3">
+                                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                                    <Phone className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-xs text-muted-foreground mb-0.5">Telepon</p>
+                                    <a
+                                        href={`tel:${task.customer_phone}`}
+                                        className="text-sm text-primary font-medium"
+                                    >
+                                        {task.customer_phone}
+                                    </a>
+                                </div>
                             </div>
 
+                            {/* Notes */}
                             {task.notes && (
-                                <div className="p-3 bg-muted rounded-lg text-sm">
-                                    <p className="font-medium mb-1">Catatan:</p>
-                                    <p className="text-muted-foreground">
-                                        {task.notes}
-                                    </p>
+                                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                    <p className="text-xs font-medium text-amber-800 mb-1">📝 Catatan</p>
+                                    <p className="text-sm text-amber-700">{task.notes}</p>
                                 </div>
                             )}
 
@@ -272,72 +286,70 @@ export default function TugasShow({ task, tarif, armadaKapasitas }: Props) {
                             {task.latitude && task.longitude && (
                                 <Button
                                     variant="outline"
-                                    className="w-full"
+                                    className="w-full h-11"
                                     onClick={openNavigation}
                                 >
                                     <Navigation className="mr-2 h-4 w-4" />
-                                    Buka di Google Maps
+                                    Navigasi ke Lokasi
                                 </Button>
                             )}
                         </CardContent>
                     </Card>
 
-                    {/* Order Info */}
-                    <Card>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-base flex items-center gap-2">
+                    {/* Order Info Card */}
+                    <Card className="overflow-hidden">
+                        <CardHeader className="pb-3 pt-4 px-4">
+                            <CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
                                 <CreditCard className="h-4 w-4" />
                                 Detail Order
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">
-                                    Estimasi Volume
-                                </span>
-                                <span className="font-medium">
-                                    {task.volume_estimate} m³
-                                </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">
-                                    Metode Pembayaran
-                                </span>
-                                <span className="font-medium">
-                                    {PAYMENT_METHOD_LABELS[task.payment_method]}
-                                </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">
-                                    Armada
-                                </span>
-                                <span className="font-medium">
-                                    {task.armada?.plat_nomor} ({task.armada?.kapasitas} m³)
-                                </span>
-                            </div>
-                            {task.scheduled_at && (
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-muted-foreground">
-                                        Jadwal
-                                    </span>
-                                    <span className="font-medium">
-                                        {new Date(task.scheduled_at).toLocaleString('id-ID')}
-                                    </span>
+                        <CardContent className="px-4 pb-4">
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="p-3 bg-muted/50 rounded-lg">
+                                    <p className="text-xs text-muted-foreground mb-1">Volume</p>
+                                    <p className="font-semibold">{task.volume_estimate} m³</p>
                                 </div>
-                            )}
+                                <div className="p-3 bg-muted/50 rounded-lg">
+                                    <p className="text-xs text-muted-foreground mb-1">Pembayaran</p>
+                                    <p className="font-semibold">{PAYMENT_METHOD_LABELS[task.payment_method]}</p>
+                                </div>
+                                <div className="p-3 bg-muted/50 rounded-lg">
+                                    <p className="text-xs text-muted-foreground mb-1">Armada</p>
+                                    <p className="font-semibold text-sm">{task.armada?.plat_nomor}</p>
+                                    <p className="text-xs text-muted-foreground">{task.armada?.kapasitas} m³</p>
+                                </div>
+                                {task.scheduled_at && (
+                                    <div className="p-3 bg-muted/50 rounded-lg">
+                                        <p className="text-xs text-muted-foreground mb-1">Jadwal</p>
+                                        <p className="font-semibold text-sm">
+                                            {new Date(task.scheduled_at).toLocaleDateString('id-ID', {
+                                                day: 'numeric',
+                                                month: 'short',
+                                            })}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {new Date(task.scheduled_at).toLocaleTimeString('id-ID', {
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                            })}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
                         </CardContent>
                     </Card>
 
                     {/* Work Form - shown when arrived or processing */}
                     {showWorkForm && (
-                        <Card>
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-base flex items-center gap-2">
+                        <Card className="overflow-hidden">
+                            <CardHeader className="pb-3 pt-4 px-4">
+                                <CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
                                     <Camera className="h-4 w-4" />
                                     Form Pengerjaan
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
+                            <CardContent className="px-4 pb-4 space-y-5">
                                 {/* Foto Sebelum */}
                                 <div className="space-y-2">
                                     <Label className="text-sm font-medium">
@@ -390,17 +402,17 @@ export default function TugasShow({ task, tarif, armadaKapasitas }: Props) {
                                 </div>
 
                                 {/* Kalkulasi Total */}
-                                <div className="p-4 bg-muted rounded-lg space-y-2">
+                                <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg space-y-3">
                                     <div className="flex justify-between text-sm">
-                                        <span>Volume × Tarif</span>
+                                        <span className="text-muted-foreground">Volume × Tarif</span>
                                         <span>
                                             {form.data.volume_actual} m³ × {formatCurrency(tarif)}
                                         </span>
                                     </div>
                                     <Separator />
-                                    <div className="flex justify-between font-semibold text-lg">
-                                        <span>Total</span>
-                                        <span className="text-primary">
+                                    <div className="flex justify-between items-center">
+                                        <span className="font-medium">Total Tagihan</span>
+                                        <span className="text-xl font-bold text-primary">
                                             {formatCurrency(calculatedTotal)}
                                         </span>
                                     </div>
@@ -410,49 +422,51 @@ export default function TugasShow({ task, tarif, armadaKapasitas }: Props) {
                     )}
                 </div>
 
-                {/* Fixed Bottom Action */}
+                {/* Fixed Bottom Action - Better mobile spacing */}
                 <div
-                    className="fixed bottom-16 left-0 right-0 p-4 bg-background border-t"
-                    style={{ paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}
+                    className="fixed bottom-16 left-0 right-0 bg-background border-t shadow-lg"
+                    style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
                 >
-                    {renderActionButton()}
+                    <div className="p-4">
+                        {renderActionButton()}
 
-                    {showWorkForm && (
-                        <div className="space-y-3">
-                            {task.payment_method === 'cash' ? (
-                                <Button
-                                    className="w-full h-12 text-base bg-green-600 hover:bg-green-700"
-                                    onClick={handleComplete}
-                                    disabled={form.processing}
-                                >
-                                    <CheckCircle className="mr-2 h-5 w-5" />
-                                    Terima Tunai {formatCurrency(calculatedTotal)}
-                                </Button>
-                            ) : (
-                                <>
-                                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-center text-sm">
-                                        <Clock className="h-4 w-4 inline mr-1" />
-                                        Pembayaran Transfer - Menunggu verifikasi admin
-                                    </div>
+                        {showWorkForm && (
+                            <div className="space-y-3">
+                                {task.payment_method === 'cash' ? (
                                     <Button
-                                        className="w-full h-12 text-base"
+                                        className="w-full h-14 text-base bg-green-600 hover:bg-green-700 font-semibold"
                                         onClick={handleComplete}
                                         disabled={form.processing}
                                     >
                                         <CheckCircle className="mr-2 h-5 w-5" />
-                                        Selesaikan Tugas
+                                        Terima Tunai {formatCurrency(calculatedTotal)}
                                     </Button>
-                                </>
-                            )}
-                        </div>
-                    )}
+                                ) : (
+                                    <>
+                                        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-center text-sm text-yellow-800">
+                                            <Clock className="h-4 w-4 inline mr-1.5" />
+                                            Pembayaran Transfer - Menunggu verifikasi admin
+                                        </div>
+                                        <Button
+                                            className="w-full h-14 text-base font-semibold"
+                                            onClick={handleComplete}
+                                            disabled={form.processing}
+                                        >
+                                            <CheckCircle className="mr-2 h-5 w-5" />
+                                            Selesaikan Tugas
+                                        </Button>
+                                    </>
+                                )}
+                            </div>
+                        )}
 
-                    {task.status === DRIVER_ORDER_STATUS.DONE && (
-                        <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-center text-sm text-green-800">
-                            <CheckCircle className="h-4 w-4 inline mr-1" />
-                            Tugas sudah selesai
-                        </div>
-                    )}
+                        {task.status === DRIVER_ORDER_STATUS.DONE && (
+                            <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center text-green-800">
+                                <CheckCircle className="h-5 w-5 inline mr-2" />
+                                <span className="font-medium">Tugas sudah selesai</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* GPS Validation Modal */}

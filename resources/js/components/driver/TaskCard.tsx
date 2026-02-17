@@ -38,54 +38,61 @@ export function TaskCard({ task, className }: TaskCardProps) {
           });
 
     return (
-        <Link href={`/app/tugas/${task.id}`}>
+        <Link href={`/app/tugas/${task.id}`} className="block">
             <Card
                 className={cn(
-                    'active:bg-muted/50 transition-colors touch-manipulation',
+                    'active:bg-muted/50 transition-colors touch-manipulation border-l-4',
+                    statusColor.includes('blue') && 'border-l-blue-500',
+                    statusColor.includes('yellow') && 'border-l-yellow-500',
+                    statusColor.includes('purple') && 'border-l-purple-500',
+                    statusColor.includes('orange') && 'border-l-orange-500',
+                    statusColor.includes('green') && 'border-l-green-500',
                     className,
                 )}
             >
-                <CardContent className="p-4">
+                <CardContent className="p-4 py-4">
                     <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0 flex-1 space-y-2">
-                            {/* Order number & badges */}
-                            <div className="flex flex-wrap items-center gap-2">
-                                <span className="text-xs font-medium text-muted-foreground">
+                        <div className="min-w-0 flex-1 space-y-2.5">
+                            {/* Status badge & order number */}
+                            <div className="flex items-center justify-between">
+                                <Badge className={cn('text-xs px-2 py-0.5', statusColor)}>
+                                    {statusLabel}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">
                                     {task.order_number}
                                 </span>
+                            </div>
+
+                            {/* Customer name & type */}
+                            <div className="space-y-1">
+                                <h3 className="font-semibold text-base leading-tight">
+                                    {task.customer_name}
+                                </h3>
                                 <Badge
                                     variant="outline"
-                                    className="text-xs px-1.5 py-0"
+                                    className="text-xs px-1.5 py-0 font-normal"
                                 >
                                     {customerTypeLabel}
                                 </Badge>
-                                <Badge className={cn('text-xs px-1.5 py-0', statusColor)}>
-                                    {statusLabel}
-                                </Badge>
                             </div>
 
-                            {/* Customer name */}
-                            <h3 className="font-semibold leading-tight truncate">
-                                {task.customer_name}
-                            </h3>
-
                             {/* Address */}
-                            <div className="flex items-start gap-1.5 text-sm text-muted-foreground">
-                                <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                                <span className="line-clamp-2">
+                            <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                                <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
+                                <span className="line-clamp-2 leading-snug">
                                     {task.customer_address}
                                 </span>
                             </div>
 
                             {/* Time info */}
-                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                <div className="flex items-center gap-1">
-                                    <Calendar className="h-3 w-3" />
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground pt-1">
+                                <div className="flex items-center gap-1.5">
+                                    <Calendar className="h-3.5 w-3.5" />
                                     <span>{formattedDate}</span>
                                 </div>
                                 {scheduledTime && (
-                                    <div className="flex items-center gap-1">
-                                        <Clock className="h-3 w-3" />
+                                    <div className="flex items-center gap-1.5">
+                                        <Clock className="h-3.5 w-3.5" />
                                         <span>{scheduledTime}</span>
                                     </div>
                                 )}
@@ -93,7 +100,7 @@ export function TaskCard({ task, className }: TaskCardProps) {
                         </div>
 
                         {/* Arrow */}
-                        <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 mt-1" />
+                        <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 self-center" />
                     </div>
                 </CardContent>
             </Card>

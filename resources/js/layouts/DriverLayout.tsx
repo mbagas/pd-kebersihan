@@ -2,7 +2,6 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     ClipboardList,
     History,
-    Loader2,
     LogOut,
     User,
     Wifi,
@@ -11,7 +10,6 @@ import {
 import type { PropsWithChildren } from 'react';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useOnlineStatus } from '@/hooks/use-online-status';
-import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -24,10 +22,9 @@ export default function DriverLayout({ children }: PropsWithChildren) {
     const { auth } = usePage().props;
     const { isCurrentUrl } = useCurrentUrl();
     const isOnline = useOnlineStatus();
-    const { containerRef, isRefreshing, pullDistance } = usePullToRefresh();
 
     return (
-        <div className="flex min-h-screen flex-col bg-background">
+        <div className="min-h-screen bg-background pb-20">
             {/* Header with safe area */}
             <header
                 className="sticky top-0 z-50 border-b bg-primary text-primary-foreground"
@@ -64,43 +61,8 @@ export default function DriverLayout({ children }: PropsWithChildren) {
                 </div>
             </header>
 
-            {/* Pull to Refresh Indicator */}
-            <div
-                className={cn(
-                    'flex items-center justify-center overflow-hidden bg-muted transition-all duration-200',
-                    pullDistance > 0 || isRefreshing
-                        ? 'opacity-100'
-                        : 'opacity-0',
-                )}
-                style={{ height: isRefreshing ? 48 : pullDistance }}
-            >
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    {isRefreshing ? (
-                        <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            <span>Memuat ulang...</span>
-                        </>
-                    ) : (
-                        <span>
-                            {pullDistance >= 80
-                                ? 'Lepaskan untuk refresh'
-                                : 'Tarik untuk refresh'}
-                        </span>
-                    )}
-                </div>
-            </div>
-
-            {/* Main Content with pull-to-refresh */}
-            <main
-                ref={containerRef}
-                className="flex-1 overflow-auto"
-                style={{
-                    paddingBottom:
-                        'calc(4rem + env(safe-area-inset-bottom, 0px))',
-                }}
-            >
-                {children}
-            </main>
+            {/* Main Content - uses native scroll */}
+            <main>{children}</main>
 
             {/* Bottom Navigation with safe area */}
             <nav
@@ -116,7 +78,7 @@ export default function DriverLayout({ children }: PropsWithChildren) {
                                 key={item.href}
                                 href={item.href}
                                 className={cn(
-                                    'flex flex-col items-center gap-1 px-4 py-2 transition-colors',
+                                    'flex min-h-[44px] min-w-[44px] flex-col items-center justify-center gap-1 px-4 py-2 transition-colors',
                                     isActive
                                         ? 'text-primary'
                                         : 'text-muted-foreground',
@@ -131,7 +93,7 @@ export default function DriverLayout({ children }: PropsWithChildren) {
                         href="/logout"
                         method="post"
                         as="button"
-                        className="flex flex-col items-center gap-1 px-4 py-2 text-muted-foreground transition-colors hover:text-destructive"
+                        className="flex min-h-[44px] min-w-[44px] flex-col items-center justify-center gap-1 px-4 py-2 text-muted-foreground transition-colors hover:text-destructive"
                     >
                         <LogOut className="h-5 w-5" />
                         <span className="text-xs">Keluar</span>
