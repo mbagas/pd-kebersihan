@@ -4,6 +4,8 @@
 export const ORDER_STATUS = {
     PENDING: 'pending',
     ASSIGNED: 'assigned',
+    ON_THE_WAY: 'on_the_way',
+    ARRIVED: 'arrived',
     PROCESSING: 'processing',
     DONE: 'done',
     CANCELLED: 'cancelled',
@@ -14,6 +16,8 @@ export type OrderStatus = (typeof ORDER_STATUS)[keyof typeof ORDER_STATUS];
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
     [ORDER_STATUS.PENDING]: 'Menunggu',
     [ORDER_STATUS.ASSIGNED]: 'Ditugaskan',
+    [ORDER_STATUS.ON_THE_WAY]: 'Dalam Perjalanan',
+    [ORDER_STATUS.ARRIVED]: 'Sampai Lokasi',
     [ORDER_STATUS.PROCESSING]: 'Diproses',
     [ORDER_STATUS.DONE]: 'Selesai',
     [ORDER_STATUS.CANCELLED]: 'Dibatalkan',

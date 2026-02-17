@@ -1,5 +1,4 @@
 import { Head, router } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
 import {
     Banknote,
     CreditCard,
@@ -14,6 +13,7 @@ import {
     User,
     UserPlus,
 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { DataTable, PageHeader } from '@/components/shared';
 import type { Column, PaginationConfig } from '@/components/shared/DataTable';

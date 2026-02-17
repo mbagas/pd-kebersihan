@@ -1,5 +1,4 @@
 import { Head } from '@inertiajs/react';
-import { useState } from 'react';
 import {
     Banknote,
     Check,
@@ -11,6 +10,7 @@ import {
     User,
     X,
 } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmDialog, DataTable, PageHeader } from '@/components/shared';
 import type { Column } from '@/components/shared/DataTable';

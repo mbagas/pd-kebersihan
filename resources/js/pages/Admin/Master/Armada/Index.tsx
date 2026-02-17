@@ -1,6 +1,6 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { useState } from 'react';
 import { Edit, Filter, Plus, Search, Trash2, Truck } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmDialog, DataTable, PageHeader } from '@/components/shared';
 import type { Column, PaginationConfig } from '@/components/shared/DataTable';

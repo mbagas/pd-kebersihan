@@ -147,7 +147,7 @@ export interface DispatchOrder {
     customer_phone: string;
     customer_npwp?: string;
     volume: number;
-    status: 'pending' | 'assigned' | 'processing' | 'done' | 'cancelled';
+    status: 'pending' | 'assigned' | 'on_the_way' | 'arrived' | 'processing' | 'done' | 'cancelled';
     // Payment fields
     payment_method: PaymentMethod;
     payment_status: PaymentStatus;

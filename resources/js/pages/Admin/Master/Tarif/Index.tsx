@@ -1,6 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
-import { useState } from 'react';
 import { Edit, Receipt } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { DataTable, PageHeader } from '@/components/shared';
 import type { Column } from '@/components/shared/DataTable';

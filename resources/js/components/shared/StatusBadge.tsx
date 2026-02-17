@@ -16,6 +16,10 @@ const statusVariants: Record<OrderStatus, string> = {
         'bg-warning/20 text-warning-foreground border-warning/30 hover:bg-warning/30',
     [ORDER_STATUS.ASSIGNED]:
         'bg-primary/20 text-primary border-primary/30 hover:bg-primary/30',
+    [ORDER_STATUS.ON_THE_WAY]:
+        'bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-200',
+    [ORDER_STATUS.ARRIVED]:
+        'bg-purple-100 text-purple-800 border-purple-300 hover:bg-purple-200',
     [ORDER_STATUS.PROCESSING]:
         'bg-accent/20 text-accent-foreground border-accent/30 hover:bg-accent/30',
     [ORDER_STATUS.DONE]:

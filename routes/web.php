@@ -48,6 +48,8 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin'])->group(fu
 Route::prefix('app')->middleware(['auth', 'verified', 'role:driver'])->group(function () {
     Route::get('/tugas', [DriverController::class, 'index'])->name('driver.tugas');
     Route::get('/tugas/{id}', [DriverController::class, 'show'])->name('driver.tugas.show');
+    Route::post('/tugas/{id}/status', [DriverController::class, 'updateStatus'])->name('driver.tugas.status');
+    Route::post('/tugas/{id}/complete', [DriverController::class, 'complete'])->name('driver.tugas.complete');
     Route::get('/riwayat', [DriverController::class, 'riwayat'])->name('driver.riwayat');
     Route::get('/profil', [DriverController::class, 'profil'])->name('driver.profil');
 });

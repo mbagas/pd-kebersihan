@@ -1,5 +1,4 @@
 import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
 import {
     Building,
     Calendar,
@@ -8,6 +7,7 @@ import {
     Package,
     TrendingUp,
 } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { DataTable, PageHeader } from '@/components/shared';
 import type { Column } from '@/components/shared/DataTable';
