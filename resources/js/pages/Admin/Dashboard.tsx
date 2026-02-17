@@ -182,9 +182,9 @@ export default function Dashboard({ stats, weeklyChart, recentOrders }: Props) {
                                         border: '1px solid hsl(var(--border))',
                                         borderRadius: '8px',
                                     }}
-                                    formatter={(value: number, name: string) => [
+                                    formatter={(value, name) => [
                                         name === 'revenue'
-                                            ? formatCurrency(value)
+                                            ? formatCurrency(value as number)
                                             : value,
                                         name === 'orders'
                                             ? 'Order'
