@@ -166,13 +166,19 @@ function MiniMap({ lat, lng }: { lat: number; lng: number }) {
     const mapInstanceRef = useRef<L.Map | null>(null);
 
     useEffect(() => {
-        if (!mapRef.current || mapInstanceRef.current) return;
+        let cancelled = false;
 
         // Dynamic import Leaflet
         import('leaflet').then((L) => {
             import('leaflet/dist/leaflet.css');
 
-            if (!mapRef.current) return;
+            if (cancelled || !mapRef.current) return;
+
+            // Clean up any existing map on this container
+            if (mapInstanceRef.current) {
+                mapInstanceRef.current.remove();
+                mapInstanceRef.current = null;
+            }
 
             const map = L.map(mapRef.current).setView([lat, lng], 15);
 
@@ -198,6 +204,7 @@ function MiniMap({ lat, lng }: { lat: number; lng: number }) {
         });
 
         return () => {
+            cancelled = true;
             if (mapInstanceRef.current) {
                 mapInstanceRef.current.remove();
                 mapInstanceRef.current = null;

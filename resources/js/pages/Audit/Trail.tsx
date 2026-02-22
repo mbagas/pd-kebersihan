@@ -20,11 +20,6 @@ import { PageHeader } from '@/components/shared';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
-} from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -112,18 +107,16 @@ function OrderRow({ order }: { order: AuditOrder }) {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-            <TableRow className="cursor-pointer hover:bg-muted/50">
+        <>
+            <TableRow className="cursor-pointer hover:bg-muted/50" onClick={() => setIsOpen(!isOpen)}>
                 <TableCell>
-                    <CollapsibleTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                            {isOpen ? (
-                                <ChevronDown className="h-4 w-4" />
-                            ) : (
-                                <ChevronRight className="h-4 w-4" />
-                            )}
-                        </Button>
-                    </CollapsibleTrigger>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                        {isOpen ? (
+                            <ChevronDown className="h-4 w-4" />
+                        ) : (
+                            <ChevronRight className="h-4 w-4" />
+                        )}
+                    </Button>
                 </TableCell>
                 <TableCell className="font-mono text-sm font-medium">
                     {order.order_number}
@@ -161,7 +154,7 @@ function OrderRow({ order }: { order: AuditOrder }) {
                     </Badge>
                 </TableCell>
             </TableRow>
-            <CollapsibleContent asChild>
+            {isOpen && (
                 <TableRow className="bg-muted/30">
                     <TableCell colSpan={8} className="p-0">
                         <div className="p-4">
@@ -174,7 +167,7 @@ function OrderRow({ order }: { order: AuditOrder }) {
                                     <div className="grid grid-cols-2 gap-2">
                                         <div className="space-y-1">
                                             <p className="text-xs text-muted-foreground">Before</p>
-                                            <div className="aspect-video rounded-lg bg-muted flex items-center justify-center">
+                                            <div className="flex aspect-video items-center justify-center rounded-lg bg-muted">
                                                 {order.foto_before ? (
                                                     <Image className="h-8 w-8 text-muted-foreground" />
                                                 ) : (
@@ -184,7 +177,7 @@ function OrderRow({ order }: { order: AuditOrder }) {
                                         </div>
                                         <div className="space-y-1">
                                             <p className="text-xs text-muted-foreground">After</p>
-                                            <div className="aspect-video rounded-lg bg-muted flex items-center justify-center">
+                                            <div className="flex aspect-video items-center justify-center rounded-lg bg-muted">
                                                 {order.foto_after ? (
                                                     <Image className="h-8 w-8 text-muted-foreground" />
                                                 ) : (
@@ -262,8 +255,8 @@ function OrderRow({ order }: { order: AuditOrder }) {
                         </div>
                     </TableCell>
                 </TableRow>
-            </CollapsibleContent>
-        </Collapsible>
+            )}
+        </>
     );
 }
 

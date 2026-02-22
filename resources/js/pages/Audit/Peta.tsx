@@ -71,6 +71,8 @@ function OrderMap({ orders }: { orders: MapOrder[] }) {
     useEffect(() => {
         if (!mapRef.current) return;
 
+        let cancelled = false;
+
         // Dynamic import Leaflet first, then MarkerCluster
         const initMap = async () => {
             const L = await import('leaflet');
@@ -84,7 +86,14 @@ function OrderMap({ orders }: { orders: MapOrder[] }) {
             await import('leaflet.markercluster/dist/MarkerCluster.css');
             await import('leaflet.markercluster/dist/MarkerCluster.Default.css');
 
-            if (!mapRef.current || mapInstanceRef.current) return;
+            if (cancelled || !mapRef.current) return;
+
+            // Clean up any existing map on this container
+            if (mapInstanceRef.current) {
+                mapInstanceRef.current.remove();
+                mapInstanceRef.current = null;
+                markersRef.current = null;
+            }
 
             const leaflet = L.default || L;
 
@@ -193,6 +202,7 @@ function OrderMap({ orders }: { orders: MapOrder[] }) {
         initMap();
 
         return () => {
+            cancelled = true;
             if (mapInstanceRef.current) {
                 mapInstanceRef.current.remove();
                 mapInstanceRef.current = null;
