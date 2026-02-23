@@ -82,17 +82,17 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                             <span>SIM-PALD</span>
                         </SheetTitle>
                     </SheetHeader>
-                    <nav className="mt-6 flex flex-col gap-2">
+                    <nav className="mt-6 flex flex-col gap-1">
                         {navItems.map((item) => (
                             <Link
                                 key={item.href}
                                 href={item.href}
                                 onClick={() => setMobileMenuOpen(false)}
                                 className={cn(
-                                    'rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                                    'px-3 py-2.5 text-sm font-medium transition-all duration-200',
                                     isCurrentUrl(item.href)
-                                        ? 'bg-accent text-accent-foreground'
-                                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                                        ? 'bg-primary/10 text-primary font-semibold'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
                                 )}
                             >
                                 {item.label}
@@ -101,7 +101,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                         <Link
                             href="/login"
                             onClick={() => setMobileMenuOpen(false)}
-                            className="mt-4 rounded-md bg-primary px-3 py-2 text-center text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                            className="mt-4 bg-primary px-3 py-2.5 text-center text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                         >
                             Masuk
                         </Link>
