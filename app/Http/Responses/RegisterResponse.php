@@ -17,6 +17,7 @@ class RegisterResponse implements RegisterResponseContract
             User::ROLE_ADMIN => route('admin.dashboard'),
             User::ROLE_DRIVER => route('driver.tugas'),
             User::ROLE_AUDITOR => route('auditor.dashboard'),
+            User::ROLE_CUSTOMER => '/customer',
             default => route('home'),
         };
 
