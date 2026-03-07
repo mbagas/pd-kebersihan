@@ -67,9 +67,12 @@ Route::prefix('customer')->middleware(['auth', 'verified', 'role:customer'])->na
     Route::post('/orders/{order}/reorder', [CustomerController::class, 'reorder'])->name('orders.reorder');
     Route::post('/orders/{order}/payment-proof', [CustomerController::class, 'uploadPaymentProof'])->name('orders.payment-proof');
     Route::get('/addresses', [CustomerController::class, 'addresses'])->name('addresses');
+    Route::get('/addresses/create', [CustomerController::class, 'createAddress'])->name('addresses.create');
     Route::post('/addresses', [CustomerController::class, 'storeAddress'])->name('addresses.store');
+    Route::get('/addresses/{address}/edit', [CustomerController::class, 'editAddress'])->name('addresses.edit');
     Route::put('/addresses/{address}', [CustomerController::class, 'updateAddress'])->name('addresses.update');
     Route::delete('/addresses/{address}', [CustomerController::class, 'destroyAddress'])->name('addresses.destroy');
+    Route::put('/addresses/{address}/default', [CustomerController::class, 'setDefaultAddress'])->name('addresses.default');
     Route::get('/profile', [CustomerController::class, 'profile'])->name('profile');
     Route::put('/profile', [CustomerController::class, 'updateProfile'])->name('profile.update');
 });

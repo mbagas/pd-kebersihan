@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CustomerAddress;
 use App\Models\CustomerProfile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -131,39 +132,6 @@ class CustomerController extends Controller
     }
 
     /**
-     * Mock customer addresses
-     */
-    private function getMockAddresses(): array
-    {
-        return [
-            [
-                'id' => 1,
-                'user_id' => 1,
-                'label' => 'Rumah',
-                'address' => 'Jl. Raden Intan No. 45, Tanjung Karang, Bandar Lampung',
-                'lat' => -5.4295,
-                'lng' => 105.2619,
-                'is_default' => true,
-                'notes' => 'Rumah warna biru, pagar hitam',
-                'created_at' => '2026-01-10 08:00:00',
-                'updated_at' => '2026-01-10 08:00:00',
-            ],
-            [
-                'id' => 2,
-                'user_id' => 1,
-                'label' => 'Kantor',
-                'address' => 'Jl. Diponegoro No. 12, Kedaton, Bandar Lampung',
-                'lat' => -5.3891,
-                'lng' => 105.2456,
-                'is_default' => false,
-                'notes' => 'Gedung lantai 2, masuk dari samping',
-                'created_at' => '2026-02-05 10:00:00',
-                'updated_at' => '2026-02-05 10:00:00',
-            ],
-        ];
-    }
-
-    /**
      * Customer Dashboard - /customer
      */
     public function dashboard(): Response
@@ -224,33 +192,140 @@ class CustomerController extends Controller
      */
     public function addresses(): Response
     {
+        $addresses = auth()->user()->customerAddresses()
+            ->orderByDesc('is_default')
+            ->orderBy('label')
+            ->get();
+
         return Inertia::render('Customer/Addresses', [
-            'addresses' => $this->getMockAddresses(),
+            'addresses' => $addresses,
         ]);
     }
 
     /**
-     * Store address (stub)
+     * Create address form - /customer/addresses/create
      */
-    public function storeAddress(Request $request)
+    public function createAddress(): Response|RedirectResponse
     {
-        return back()->with('success', 'Alamat berhasil ditambahkan');
+        $count = auth()->user()->customerAddresses()->count();
+
+        if ($count >= 5) {
+            return redirect()->route('customer.addresses')
+                ->with('error', 'Maksimum 5 alamat. Hapus alamat lama untuk menambahkan yang baru.');
+        }
+
+        return Inertia::render('Customer/Addresses/Form', [
+            'address' => null,
+        ]);
     }
 
     /**
-     * Update address (stub)
+     * Store address
      */
-    public function updateAddress(Request $request, string $address)
+    public function storeAddress(Request $request): RedirectResponse
     {
-        return back()->with('success', 'Alamat berhasil diperbarui');
+        $user = auth()->user();
+
+        if ($user->customerAddresses()->count() >= 5) {
+            return back()->withErrors(['limit' => 'Maksimum 5 alamat tercapai.']);
+        }
+
+        $validated = $request->validate([
+            'label' => ['required', 'string', 'max:50'],
+            'address' => ['required', 'string', 'max:500'],
+            'lat' => ['required', 'numeric', 'between:-90,90'],
+            'lng' => ['required', 'numeric', 'between:-180,180'],
+            'notes' => ['nullable', 'string', 'max:255'],
+            'is_default' => ['boolean'],
+        ]);
+
+        $address = $user->customerAddresses()->create($validated);
+
+        // Auto-set as default if first address or requested
+        if ($user->customerAddresses()->count() === 1 || ($validated['is_default'] ?? false)) {
+            $address->setAsDefault();
+        }
+
+        return redirect()->route('customer.addresses')
+            ->with('success', 'Alamat berhasil ditambahkan');
     }
 
     /**
-     * Delete address (stub)
+     * Edit address form - /customer/addresses/{address}/edit
      */
-    public function destroyAddress(string $address)
+    public function editAddress(CustomerAddress $address): Response
     {
-        return back()->with('success', 'Alamat berhasil dihapus');
+        if ($address->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        return Inertia::render('Customer/Addresses/Form', [
+            'address' => $address,
+        ]);
+    }
+
+    /**
+     * Update address
+     */
+    public function updateAddress(Request $request, CustomerAddress $address): RedirectResponse
+    {
+        if ($address->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'label' => ['required', 'string', 'max:50'],
+            'address' => ['required', 'string', 'max:500'],
+            'lat' => ['required', 'numeric', 'between:-90,90'],
+            'lng' => ['required', 'numeric', 'between:-180,180'],
+            'notes' => ['nullable', 'string', 'max:255'],
+            'is_default' => ['boolean'],
+        ]);
+
+        $address->update($validated);
+
+        if ($validated['is_default'] ?? false) {
+            $address->setAsDefault();
+        }
+
+        return redirect()->route('customer.addresses')
+            ->with('success', 'Alamat berhasil diperbarui');
+    }
+
+    /**
+     * Delete address
+     */
+    public function destroyAddress(CustomerAddress $address): RedirectResponse
+    {
+        if ($address->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $wasDefault = $address->is_default;
+        $address->delete();
+
+        // If deleted address was default, set the first remaining as default
+        if ($wasDefault) {
+            $firstAddress = auth()->user()->customerAddresses()->first();
+            $firstAddress?->setAsDefault();
+        }
+
+        return redirect()->route('customer.addresses')
+            ->with('success', 'Alamat berhasil dihapus');
+    }
+
+    /**
+     * Set address as default
+     */
+    public function setDefaultAddress(CustomerAddress $address): RedirectResponse
+    {
+        if ($address->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $address->setAsDefault();
+
+        return back()->with('success', 'Alamat default berhasil diubah');
     }
 
     /**
