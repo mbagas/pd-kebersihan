@@ -23,7 +23,8 @@ import PublicLayout from '@/layouts/PublicLayout';
 
 export default function Home() {
     const { auth } = usePage().props;
-    const isLoggedIn = !!auth?.user;
+    const user = auth?.user;
+    const isCustomer = user?.role === 'customer';
     const features = [
         {
             icon: Truck,
@@ -132,7 +133,7 @@ export default function Home() {
                             size="lg"
                             className="w-full sm:w-auto"
                         >
-                            {isLoggedIn ? (
+                            {isCustomer ? (
                                 <Link href="/customer/orders">Lihat Pesanan Saya</Link>
                             ) : (
                                 <Link href="/register">Daftar Akun</Link>

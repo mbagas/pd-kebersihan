@@ -21,7 +21,7 @@ interface Props {
 
 export default function Profile({ profile }: Props) {
     const { auth } = usePage().props;
-    const user = auth.user;
+    const user = auth.user!;
 
     const { data, setData, put, processing } = useForm({
         name: user.name,
