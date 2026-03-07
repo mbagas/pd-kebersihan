@@ -84,20 +84,20 @@ export default function Dashboard({
                     {statCards.map((stat) => {
                         const Icon = stat.icon;
                         return (
-                            <Card key={stat.key}>
-                                <CardContent className="flex items-center gap-3 p-4">
+                            <Card key={stat.key} className="gap-0 py-0">
+                                <CardContent className="flex items-center gap-3 p-3">
                                     <div
-                                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${stat.bg}`}
+                                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${stat.bg}`}
                                     >
                                         <Icon
-                                            className={`h-5 w-5 ${stat.color}`}
+                                            className={`h-4 w-4 ${stat.color}`}
                                         />
                                     </div>
                                     <div>
-                                        <p className="text-2xl font-bold">
+                                        <p className="text-xl font-bold leading-tight">
                                             {stats[stat.key]}
                                         </p>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="text-[11px] text-muted-foreground">
                                             {stat.label}
                                         </p>
                                     </div>
@@ -138,7 +138,7 @@ export default function Dashboard({
                                 <ArrowRight className="h-3 w-3" />
                             </Link>
                         </div>
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {activeOrders.map((order) => (
                                 <CustomerOrderCard
                                     key={order.id}
@@ -164,7 +164,7 @@ export default function Dashboard({
                                 <ArrowRight className="h-3 w-3" />
                             </Link>
                         </div>
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {recentOrders.map((order) => (
                                 <CustomerOrderCard
                                     key={order.id}

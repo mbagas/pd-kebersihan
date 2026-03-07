@@ -191,7 +191,7 @@ export default function Orders({ orders }: Props) {
 
                 {/* Order Cards */}
                 {visibleOrders.length > 0 ? (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         {visibleOrders.map((order) => (
                             <CustomerOrderCard
                                 key={order.id}

@@ -31,15 +31,15 @@ function formatCurrency(amount: number) {
 
 export function CustomerOrderCard({ order }: CustomerOrderCardProps) {
     return (
-        <Link href={`/customer/orders/${order.id}`}>
-            <Card className="transition-shadow hover:shadow-md">
-                <CardHeader className="pb-2">
+        <Link href={`/customer/orders/${order.id}`} className="block">
+            <Card className="gap-0 py-3 transition-shadow hover:shadow-md">
+                <CardHeader className="px-4 pb-2">
                     <div className="flex items-start justify-between">
                         <div>
                             <p className="text-sm font-medium">
                                 {order.ticket_number}
                             </p>
-                            <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
                                 <Calendar className="h-3 w-3" />
                                 <span>
                                     {formatDate(order.created_at)}
@@ -49,7 +49,7 @@ export function CustomerOrderCard({ order }: CustomerOrderCardProps) {
                         <StatusBadge status={order.status} />
                     </div>
                 </CardHeader>
-                <CardContent className="pb-2">
+                <CardContent className="px-4 pb-2">
                     <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                         <MapPin className="h-3.5 w-3.5 shrink-0" />
                         <span className="line-clamp-1">
@@ -62,11 +62,13 @@ export function CustomerOrderCard({ order }: CustomerOrderCardProps) {
                         </p>
                     )}
                 </CardContent>
-                <CardFooter className="flex items-center justify-between border-t pt-3">
-                    <PaymentBadge status={order.payment_status} />
-                    <span className="font-semibold text-primary">
-                        {formatCurrency(order.total_price)}
-                    </span>
+                <CardFooter className="border-t px-4 pt-2">
+                    <div className="flex w-full items-center justify-between">
+                        <PaymentBadge status={order.payment_status} />
+                        <span className="text-sm font-semibold text-primary">
+                            {formatCurrency(order.total_price)}
+                        </span>
+                    </div>
                 </CardFooter>
             </Card>
         </Link>
