@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -17,8 +19,11 @@ class User extends Authenticatable
      * User roles
      */
     public const ROLE_ADMIN = 'admin';
+
     public const ROLE_DRIVER = 'driver';
+
     public const ROLE_AUDITOR = 'auditor';
+
     public const ROLE_CUSTOMER = 'customer';
 
     public const ROLES = [
@@ -105,5 +110,20 @@ class User extends Authenticatable
     public function isCustomer(): bool
     {
         return $this->hasRole(self::ROLE_CUSTOMER);
+    }
+
+    public function customerProfile(): HasOne
+    {
+        return $this->hasOne(CustomerProfile::class);
+    }
+
+    public function customerAddresses(): HasMany
+    {
+        return $this->hasMany(CustomerAddress::class);
+    }
+
+    public function defaultAddress(): HasOne
+    {
+        return $this->hasOne(CustomerAddress::class)->where('is_default', true);
     }
 }

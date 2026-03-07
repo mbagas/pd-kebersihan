@@ -1,5 +1,5 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { Building2, Home, Save } from 'lucide-react';
+import { Building2, CheckCircle2, Home, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -20,10 +20,12 @@ interface Props {
 }
 
 export default function Profile({ profile }: Props) {
-    const { auth } = usePage().props;
+    const { auth, flash } = usePage<{
+        flash?: { success?: string };
+    }>().props;
     const user = auth.user!;
 
-    const { data, setData, put, processing } = useForm({
+    const { data, setData, put, processing, errors } = useForm({
         name: user.name,
         phone: user.phone ?? '',
         customer_type: profile.customer_type,
@@ -52,6 +54,14 @@ export default function Profile({ profile }: Props) {
                     Profil Saya
                 </h1>
 
+                {/* Success Flash */}
+                {flash?.success && (
+                    <div className="flex items-center gap-2 rounded-lg bg-green-50 p-3 text-sm text-green-700">
+                        <CheckCircle2 className="h-4 w-4 shrink-0" />
+                        {flash.success}
+                    </div>
+                )}
+
                 {/* Personal Info */}
                 <Card>
                     <CardHeader className="pb-3">
@@ -74,6 +84,11 @@ export default function Profile({ profile }: Props) {
                                     )
                                 }
                             />
+                            {errors.name && (
+                                <p className="text-xs text-destructive">
+                                    {errors.name}
+                                </p>
+                            )}
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="email">
@@ -101,6 +116,11 @@ export default function Profile({ profile }: Props) {
                                 }
                                 placeholder="081234567890"
                             />
+                            {errors.phone && (
+                                <p className="text-xs text-destructive">
+                                    {errors.phone}
+                                </p>
+                            )}
                         </div>
                     </CardContent>
                 </Card>

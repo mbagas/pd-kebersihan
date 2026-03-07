@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CustomerProfile;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -168,9 +171,9 @@ class CustomerController extends Controller
         $orders = $this->getMockOrders();
 
         $activeStatuses = ['pending', 'assigned', 'on_the_way', 'arrived', 'processing'];
-        $activeOrders = array_filter($orders, fn($o) => in_array($o['status'], $activeStatuses));
-        $completedOrders = array_filter($orders, fn($o) => $o['status'] === 'done');
-        $pendingPayments = array_filter($orders, fn($o) => $o['payment_status'] === 'unpaid');
+        $activeOrders = array_filter($orders, fn ($o) => in_array($o['status'], $activeStatuses));
+        $completedOrders = array_filter($orders, fn ($o) => $o['status'] === 'done');
+        $pendingPayments = array_filter($orders, fn ($o) => $o['payment_status'] === 'unpaid');
 
         $stats = [
             'total_orders' => count($orders),
@@ -207,7 +210,7 @@ class CustomerController extends Controller
         $orders = $this->getMockOrders();
         $found = collect($orders)->firstWhere('id', (int) $order);
 
-        if (!$found) {
+        if (! $found) {
             abort(404);
         }
 
@@ -255,18 +258,10 @@ class CustomerController extends Controller
      */
     public function profile(): Response
     {
-        // Mock profile data
-        $profile = [
-            'id' => 1,
-            'user_id' => 1,
+        $user = auth()->user();
+        $profile = $user->customerProfile ?? new CustomerProfile([
             'customer_type' => 'household',
-            'company_name' => null,
-            'npwp' => null,
-            'pic_name' => null,
-            'business_type' => null,
-            'created_at' => '2026-01-10 08:00:00',
-            'updated_at' => '2026-01-10 08:00:00',
-        ];
+        ]);
 
         return Inertia::render('Customer/Profile', [
             'profile' => $profile,
@@ -274,10 +269,38 @@ class CustomerController extends Controller
     }
 
     /**
-     * Update profile (stub)
+     * Update profile
      */
-    public function updateProfile(Request $request)
+    public function updateProfile(Request $request): RedirectResponse
     {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'customer_type' => ['required', Rule::in(['household', 'institution'])],
+            'company_name' => ['nullable', 'string', 'max:255'],
+            'npwp' => ['nullable', 'string', 'max:30'],
+            'pic_name' => ['nullable', 'string', 'max:255'],
+            'business_type' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $user = auth()->user();
+
+        $user->update([
+            'name' => $validated['name'],
+            'phone' => $validated['phone'],
+        ]);
+
+        $user->customerProfile()->updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'customer_type' => $validated['customer_type'],
+                'company_name' => $validated['company_name'],
+                'npwp' => $validated['npwp'],
+                'pic_name' => $validated['pic_name'],
+                'business_type' => $validated['business_type'],
+            ],
+        );
+
         return back()->with('success', 'Profil berhasil diperbarui');
     }
 
