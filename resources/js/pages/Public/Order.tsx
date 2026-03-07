@@ -9,15 +9,25 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import PublicLayout from '@/layouts/PublicLayout';
+import type { CustomerAddress, CustomerProfile } from '@/types/customer';
+import type { OrderFormPrefill } from '@/types/order';
 
 interface OrderPageProps {
     tariff?: {
         household: number;
         institution: number;
     };
+    addresses?: CustomerAddress[];
+    profile?: CustomerProfile | null;
+    prefill?: OrderFormPrefill;
 }
 
-export default function Order({ tariff }: OrderPageProps) {
+export default function Order({
+    tariff,
+    addresses,
+    profile,
+    prefill,
+}: OrderPageProps) {
     return (
         <PublicLayout>
             <Head title="Pesan Layanan" />
@@ -40,7 +50,13 @@ export default function Order({ tariff }: OrderPageProps) {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <OrderForm tariff={tariff} submitUrl="/order" />
+                        <OrderForm
+                            tariff={tariff}
+                            submitUrl="/order"
+                            addresses={addresses}
+                            profile={profile}
+                            prefill={prefill}
+                        />
                     </CardContent>
                 </Card>
             </div>
