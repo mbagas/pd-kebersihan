@@ -15,11 +15,12 @@ interface Props {
     orders: CustomerOrder[];
 }
 
-type TabKey = 'active' | 'completed' | 'all';
+type TabKey = 'active' | 'completed' | 'unpaid' | 'all';
 
 const tabs: { key: TabKey; label: string }[] = [
     { key: 'active', label: 'Aktif' },
     { key: 'completed', label: 'Selesai' },
+    { key: 'unpaid', label: 'Belum Bayar' },
     { key: 'all', label: 'Semua' },
 ];
 
@@ -47,8 +48,7 @@ function useDebounce<T>(value: T, delay: number): T {
 export default function Orders({ orders }: Props) {
     const [activeTab, setActiveTab] = useState<TabKey>('active');
     const [search, setSearch] = useState('');
-    const [visibleCount, setVisibleCount] =
-        useState(ITEMS_PER_PAGE);
+    const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
     const debouncedSearch = useDebounce(search, 300);
 
@@ -56,9 +56,7 @@ export default function Orders({ orders }: Props) {
         usePullToRefresh({
             onRefresh: async () => {
                 // In prototype, just simulate a reload delay
-                await new Promise((resolve) =>
-                    setTimeout(resolve, 800),
-                );
+                await new Promise((resolve) => setTimeout(resolve, 800));
             },
         });
 
@@ -67,13 +65,11 @@ export default function Orders({ orders }: Props) {
 
         // Filter by tab
         if (activeTab === 'active') {
-            result = result.filter((o) =>
-                ACTIVE_STATUSES.includes(o.status),
-            );
+            result = result.filter((o) => ACTIVE_STATUSES.includes(o.status));
         } else if (activeTab === 'completed') {
-            result = result.filter(
-                (o) => o.status === 'done',
-            );
+            result = result.filter((o) => o.status === 'done');
+        } else if (activeTab === 'unpaid') {
+            result = result.filter((o) => o.payment_status === 'unpaid');
         }
 
         // Filter by search
@@ -81,22 +77,15 @@ export default function Orders({ orders }: Props) {
             const q = debouncedSearch.toLowerCase();
             result = result.filter(
                 (o) =>
-                    o.ticket_number
-                        .toLowerCase()
-                        .includes(q) ||
-                    o.customer_address
-                        .toLowerCase()
-                        .includes(q),
+                    o.ticket_number.toLowerCase().includes(q) ||
+                    o.customer_address.toLowerCase().includes(q),
             );
         }
 
         return result;
     }, [orders, activeTab, debouncedSearch]);
 
-    const visibleOrders = filteredOrders.slice(
-        0,
-        visibleCount,
-    );
+    const visibleOrders = filteredOrders.slice(0, visibleCount);
     const hasMore = visibleCount < filteredOrders.length;
 
     const handleTabChange = (tab: TabKey) => {
@@ -114,9 +103,7 @@ export default function Orders({ orders }: Props) {
                     <div
                         className="flex items-center justify-center overflow-hidden transition-all"
                         style={{
-                            height: isRefreshing
-                                ? 40
-                                : pullDistance * 0.5,
+                            height: isRefreshing ? 40 : pullDistance * 0.5,
                         }}
                     >
                         <Loader2
@@ -133,9 +120,7 @@ export default function Orders({ orders }: Props) {
                     </div>
                 )}
 
-                <h1 className="text-xl font-bold">
-                    Pesanan Saya
-                </h1>
+                <h1 className="text-xl font-bold">Pesanan Saya</h1>
 
                 {/* Search */}
                 <div className="relative">
@@ -147,7 +132,7 @@ export default function Orders({ orders }: Props) {
                             setSearch(e.target.value);
                             setVisibleCount(ITEMS_PER_PAGE);
                         }}
-                        className="pl-9 pr-9"
+                        className="pr-9 pl-9"
                     />
                     {search && (
                         <button
@@ -171,9 +156,7 @@ export default function Orders({ orders }: Props) {
                                 activeTab === tab.key &&
                                     'bg-background shadow-sm',
                             )}
-                            onClick={() =>
-                                handleTabChange(tab.key)
-                            }
+                            onClick={() => handleTabChange(tab.key)}
                         >
                             {tab.label}
                         </Button>
@@ -184,8 +167,7 @@ export default function Orders({ orders }: Props) {
                 {filteredOrders.length > 0 && (
                     <p className="text-sm text-muted-foreground">
                         {filteredOrders.length} pesanan
-                        {debouncedSearch &&
-                            ` untuk "${debouncedSearch}"`}
+                        {debouncedSearch && ` untuk "${debouncedSearch}"`}
                     </p>
                 )}
 
@@ -193,10 +175,7 @@ export default function Orders({ orders }: Props) {
                 {visibleOrders.length > 0 ? (
                     <div className="space-y-4">
                         {visibleOrders.map((order) => (
-                            <CustomerOrderCard
-                                key={order.id}
-                                order={order}
-                            />
+                            <CustomerOrderCard key={order.id} order={order} />
                         ))}
 
                         {/* Load More */}
@@ -206,9 +185,7 @@ export default function Orders({ orders }: Props) {
                                 className="w-full"
                                 onClick={() =>
                                     setVisibleCount(
-                                        (prev) =>
-                                            prev +
-                                            ITEMS_PER_PAGE,
+                                        (prev) => prev + ITEMS_PER_PAGE,
                                     )
                                 }
                             >
@@ -227,7 +204,9 @@ export default function Orders({ orders }: Props) {
                                   ? 'Belum ada pesanan aktif'
                                   : activeTab === 'completed'
                                     ? 'Belum ada pesanan selesai'
-                                    : 'Belum ada pesanan'
+                                    : activeTab === 'unpaid'
+                                      ? 'Tidak ada tagihan belum bayar'
+                                      : 'Belum ada pesanan'
                         }
                     />
                 )}
