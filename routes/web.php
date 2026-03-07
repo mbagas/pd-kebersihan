@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\PetugasController;
 use App\Http\Controllers\Admin\TarifController;
 use App\Http\Controllers\AuditorController;
 use App\Http\Controllers\DriverController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\PublicController;
 use Illuminate\Support\Facades\Route;
 
@@ -52,6 +53,25 @@ Route::prefix('app')->middleware(['auth', 'verified', 'role:driver'])->group(fun
     Route::post('/tugas/{id}/complete', [DriverController::class, 'complete'])->name('driver.tugas.complete');
     Route::get('/riwayat', [DriverController::class, 'riwayat'])->name('driver.riwayat');
     Route::get('/profil', [DriverController::class, 'profil'])->name('driver.profil');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Customer Routes (Mobile-first PWA)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('customer')->middleware(['auth', 'verified', 'role:customer'])->name('customer.')->group(function () {
+    Route::get('/', [CustomerController::class, 'dashboard'])->name('dashboard');
+    Route::get('/orders', [CustomerController::class, 'orders'])->name('orders');
+    Route::get('/orders/{order}', [CustomerController::class, 'orderDetail'])->name('orders.show');
+    Route::post('/orders/{order}/reorder', [CustomerController::class, 'reorder'])->name('orders.reorder');
+    Route::post('/orders/{order}/payment-proof', [CustomerController::class, 'uploadPaymentProof'])->name('orders.payment-proof');
+    Route::get('/addresses', [CustomerController::class, 'addresses'])->name('addresses');
+    Route::post('/addresses', [CustomerController::class, 'storeAddress'])->name('addresses.store');
+    Route::put('/addresses/{address}', [CustomerController::class, 'updateAddress'])->name('addresses.update');
+    Route::delete('/addresses/{address}', [CustomerController::class, 'destroyAddress'])->name('addresses.destroy');
+    Route::get('/profile', [CustomerController::class, 'profile'])->name('profile');
+    Route::put('/profile', [CustomerController::class, 'updateProfile'])->name('profile.update');
 });
 
 /*

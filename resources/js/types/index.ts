@@ -35,3 +35,9 @@ export {
 } from './admin';
 export * from './driver';
 export * from './audit';
+export type {
+    CustomerProfile,
+    CustomerAddress,
+    CustomerOrder,
+    CustomerDashboardStats,
+} from './customer';

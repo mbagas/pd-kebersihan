@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import {
     Building2,
     CheckCircle2,
@@ -22,6 +22,9 @@ import {
 import PublicLayout from '@/layouts/PublicLayout';
 
 export default function Home() {
+    const { auth } = usePage().props;
+    const user = auth?.user;
+    const isCustomer = user?.role === 'customer';
     const features = [
         {
             icon: Truck,
@@ -130,7 +133,11 @@ export default function Home() {
                             size="lg"
                             className="w-full sm:w-auto"
                         >
-                            <Link href="/tracking">Lacak Pesanan</Link>
+                            {isCustomer ? (
+                                <Link href="/customer/orders">Lihat Pesanan Saya</Link>
+                            ) : (
+                                <Link href="/register">Daftar Akun</Link>
+                            )}
                         </Button>
                     </div>
                 </div>
