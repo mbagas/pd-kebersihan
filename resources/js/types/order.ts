@@ -92,3 +92,16 @@ export interface Order {
     created_at: string;
     updated_at: string;
 }
+
+/**
+ * Prefill data for reorder flow
+ */
+export interface OrderFormPrefill {
+    customer_type?: CustomerType;
+    name?: string;
+    phone?: string;
+    address?: string;
+    estimated_volume?: number;
+    payment_method?: 'cod' | 'transfer';
+    notes?: string;
+}

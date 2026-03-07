@@ -1,13 +1,20 @@
-import { useForm } from '@inertiajs/react';
-import { Banknote, CreditCard } from 'lucide-react';
+import { useForm, usePage } from '@inertiajs/react';
+import { Banknote, Check, CreditCard, MapPin, Plus, Star } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import InputError from '@/components/input-error';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
-import { CUSTOMER_TYPE } from '@/types/order';
-import type { CustomerType } from '@/types/order';
+import type { CustomerAddress, CustomerProfile } from '@/types/customer';
+import {
+    CUSTOMER_TYPE,
+    type CustomerType,
+    type OrderFormPrefill,
+} from '@/types/order';
 import { AddressInput } from './AddressInput';
 import { CustomerTypeSelector } from './CustomerTypeSelector';
 import { FormField } from './FormField';
@@ -39,6 +46,8 @@ interface OrderFormData {
     has_grease_trap: boolean;
     payment_method: PaymentMethod;
     notes: string;
+    save_address: boolean;
+    address_label: string;
 }
 
 interface Tariff {
@@ -50,6 +59,9 @@ interface OrderFormProps {
     tariff?: Tariff;
     onSuccess?: () => void;
     submitUrl?: string;
+    addresses?: CustomerAddress[];
+    profile?: CustomerProfile | null;
+    prefill?: OrderFormPrefill;
 }
 
 const DEFAULT_TARIFF: Tariff = {
@@ -72,28 +84,75 @@ const PAYMENT_OPTIONS = [
     },
 ] as const;
 
+const LABEL_PRESETS = ['Rumah', 'Kantor', 'Kos'];
+
 export function OrderForm({
     tariff = DEFAULT_TARIFF,
     onSuccess,
     submitUrl = '/order',
+    addresses,
+    profile,
+    prefill,
 }: OrderFormProps) {
-    const [customerType, setCustomerType] = useState<CustomerType>(
-        CUSTOMER_TYPE.HOUSEHOLD,
+    const { auth } = usePage().props as {
+        auth: { user: { id: number; name: string; phone?: string } | null };
+    };
+    const user = auth.user;
+    const isLoggedIn = !!user;
+    const hasAddresses = addresses && addresses.length > 0;
+
+    // Address selection: 'saved' (pick from list) or 'new' (manual entry)
+    const [addressMode, setAddressMode] = useState<'saved' | 'new'>(
+        hasAddresses ? 'saved' : 'new',
     );
+    const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
+        hasAddresses
+            ? (addresses.find((a) => a.is_default)?.id ??
+                  addresses[0]?.id ??
+                  null)
+            : null,
+    );
+    const [customLabel, setCustomLabel] = useState('');
+    const [showCustomLabel, setShowCustomLabel] = useState(false);
+
+    const initialType =
+        prefill?.customer_type ??
+        profile?.customer_type ??
+        CUSTOMER_TYPE.HOUSEHOLD;
+
+    const [customerType, setCustomerType] = useState<CustomerType>(initialType);
+
+    // Build initial address/location from selected saved address
+    const selectedAddress = hasAddresses
+        ? (addresses.find((a) => a.id === selectedAddressId) ?? null)
+        : null;
+
     const form = useForm<OrderFormData>({
-        customer_type: CUSTOMER_TYPE.HOUSEHOLD,
-        name: '',
-        phone: '',
-        address: '',
-        location: null,
-        company_name: '',
-        npwp: '',
-        pic_name: '',
-        business_type: '',
-        estimated_volume: 0,
+        customer_type: initialType,
+        name: prefill?.name ?? user?.name ?? '',
+        phone: prefill?.phone ?? user?.phone ?? '',
+        address:
+            prefill?.address ??
+            (addressMode === 'saved' && selectedAddress
+                ? selectedAddress.address
+                : ''),
+        location:
+            addressMode === 'saved' && selectedAddress
+                ? {
+                      lat: selectedAddress.lat,
+                      lng: selectedAddress.lng,
+                  }
+                : null,
+        company_name: profile?.company_name ?? '',
+        npwp: profile?.npwp ?? '',
+        pic_name: profile?.pic_name ?? '',
+        business_type: profile?.business_type ?? '',
+        estimated_volume: prefill?.estimated_volume ?? 0,
         has_grease_trap: false,
-        payment_method: 'cod',
-        notes: '',
+        payment_method: prefill?.payment_method ?? 'cod',
+        notes: prefill?.notes ?? '',
+        save_address: false,
+        address_label: '',
     });
 
     const isInstitution = customerType === CUSTOMER_TYPE.INSTITUTION;
@@ -113,6 +172,41 @@ export function OrderForm({
         if (location?.address && !form.data.address) {
             form.setData('address', location.address);
         }
+    };
+
+    const handleSelectAddress = (address: CustomerAddress) => {
+        setSelectedAddressId(address.id);
+        form.setData('address', address.address);
+        form.setData('location', {
+            lat: address.lat,
+            lng: address.lng,
+        });
+    };
+
+    const handleSwitchToNew = () => {
+        setAddressMode('new');
+        setSelectedAddressId(null);
+        form.setData('address', '');
+        form.setData('location', null);
+    };
+
+    const handleSwitchToSaved = () => {
+        setAddressMode('saved');
+        if (selectedAddress) {
+            handleSelectAddress(selectedAddress);
+        } else if (hasAddresses) {
+            handleSelectAddress(addresses[0]);
+        }
+    };
+
+    const handleLabelPreset = (label: string) => {
+        setShowCustomLabel(false);
+        form.setData('address_label', label);
+    };
+
+    const handleCustomLabelSelect = () => {
+        setShowCustomLabel(true);
+        form.setData('address_label', customLabel);
     };
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -136,8 +230,22 @@ export function OrderForm({
                 <CustomerTypeSelector
                     value={customerType}
                     onChange={handleCustomerTypeChange}
-                    disabled={form.processing}
+                    disabled={
+                        form.processing ||
+                        (isLoggedIn && !!profile?.customer_type)
+                    }
                 />
+                {isLoggedIn && profile?.customer_type && (
+                    <p className="text-xs text-muted-foreground">
+                        Tipe pelanggan diambil dari profil Anda.{' '}
+                        <a
+                            href="/customer/profile"
+                            className="text-primary hover:underline"
+                        >
+                            Edit Profil
+                        </a>
+                    </p>
+                )}
             </FormSection>
 
             <FormSection
@@ -164,6 +272,12 @@ export function OrderForm({
                                 }
                                 placeholder="PT. Contoh Perusahaan"
                                 disabled={form.processing}
+                                readOnly={isLoggedIn && !!profile?.company_name}
+                                className={cn(
+                                    isLoggedIn &&
+                                        profile?.company_name &&
+                                        'bg-muted',
+                                )}
                             />
                         </FormField>
                         <FormField
@@ -197,6 +311,14 @@ export function OrderForm({
                                 }
                                 placeholder="Hotel, Restoran, Rumah Sakit, dll"
                                 disabled={form.processing}
+                                readOnly={
+                                    isLoggedIn && !!profile?.business_type
+                                }
+                                className={cn(
+                                    isLoggedIn &&
+                                        profile?.business_type &&
+                                        'bg-muted',
+                                )}
                             />
                         </FormField>
                         <FormField
@@ -213,6 +335,12 @@ export function OrderForm({
                                 }
                                 placeholder="Nama penanggung jawab"
                                 disabled={form.processing}
+                                readOnly={isLoggedIn && !!profile?.pic_name}
+                                className={cn(
+                                    isLoggedIn &&
+                                        profile?.pic_name &&
+                                        'bg-muted',
+                                )}
                             />
                         </FormField>
                     </>
@@ -231,6 +359,8 @@ export function OrderForm({
                             }
                             placeholder="Nama lengkap Anda"
                             disabled={form.processing}
+                            readOnly={isLoggedIn}
+                            className={cn(isLoggedIn && 'bg-muted')}
                         />
                     </FormField>
                 )}
@@ -241,42 +371,278 @@ export function OrderForm({
                     required
                     description="Kami akan menghubungi Anda via WhatsApp"
                 >
-                    <PhoneInput
-                        id="phone"
-                        onChange={(value) => form.setData('phone', value)}
-                        disabled={form.processing}
-                    />
+                    {isLoggedIn && user?.phone ? (
+                        <Input
+                            id="phone"
+                            value={form.data.phone}
+                            readOnly
+                            className="bg-muted"
+                        />
+                    ) : (
+                        <PhoneInput
+                            id="phone"
+                            onChange={(value) => form.setData('phone', value)}
+                            disabled={form.processing}
+                        />
+                    )}
                 </FormField>
+                {isLoggedIn && (
+                    <p className="text-xs text-muted-foreground">
+                        Data diambil dari profil Anda.{' '}
+                        <a
+                            href="/customer/profile"
+                            className="text-primary hover:underline"
+                        >
+                            Edit Profil
+                        </a>
+                    </p>
+                )}
             </FormSection>
 
             <FormSection
                 title="Lokasi Penyedotan"
                 description="Tentukan lokasi yang akan dikunjungi petugas"
             >
-                <FormField
-                    label="Pilih Lokasi di Peta"
-                    error={form.errors.location as string}
-                    required
-                >
-                    <MapPicker
-                        value={form.data.location ?? undefined}
-                        onChange={handleLocationChange}
-                    />
-                </FormField>
-                <FormField
-                    label="Alamat Lengkap"
-                    htmlFor="address"
-                    error={form.errors.address}
-                    required
-                    description="Sertakan patokan jika perlu"
-                >
-                    <AddressInput
-                        id="address"
-                        value={form.data.address}
-                        onChange={(value) => form.setData('address', value)}
-                        disabled={form.processing}
-                    />
-                </FormField>
+                {/* Address selector for logged-in users with saved addresses */}
+                {isLoggedIn && hasAddresses && (
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                            <Button
+                                type="button"
+                                variant={
+                                    addressMode === 'saved'
+                                        ? 'default'
+                                        : 'outline'
+                                }
+                                size="sm"
+                                onClick={handleSwitchToSaved}
+                            >
+                                <MapPin className="mr-1 h-4 w-4" />
+                                Alamat Tersimpan
+                            </Button>
+                            <Button
+                                type="button"
+                                variant={
+                                    addressMode === 'new'
+                                        ? 'default'
+                                        : 'outline'
+                                }
+                                size="sm"
+                                onClick={handleSwitchToNew}
+                            >
+                                <Plus className="mr-1 h-4 w-4" />
+                                Alamat Baru
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Saved address cards */}
+                {addressMode === 'saved' && hasAddresses && (
+                    <div className="space-y-2">
+                        {addresses.map((address) => {
+                            const isSelected = selectedAddressId === address.id;
+                            return (
+                                <button
+                                    key={address.id}
+                                    type="button"
+                                    onClick={() => handleSelectAddress(address)}
+                                    className={cn(
+                                        'flex w-full items-start gap-3 rounded-lg border-2 p-3 text-left transition-colors',
+                                        isSelected
+                                            ? 'border-primary bg-primary/5'
+                                            : 'border-muted hover:border-muted-foreground/30',
+                                    )}
+                                >
+                                    <div
+                                        className={cn(
+                                            'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2',
+                                            isSelected
+                                                ? 'border-primary bg-primary text-primary-foreground'
+                                                : 'border-muted-foreground/30',
+                                        )}
+                                    >
+                                        {isSelected && (
+                                            <Check className="h-3 w-3" />
+                                        )}
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <Badge
+                                                variant="secondary"
+                                                className="text-xs"
+                                            >
+                                                {address.label}
+                                            </Badge>
+                                            {address.is_default && (
+                                                <Badge
+                                                    variant="outline"
+                                                    className="gap-1 border-primary/30 bg-primary/10 text-xs text-primary"
+                                                >
+                                                    <Star className="h-3 w-3" />
+                                                    Default
+                                                </Badge>
+                                            )}
+                                        </div>
+                                        <p className="mt-1 text-sm text-muted-foreground">
+                                            {address.address}
+                                        </p>
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
+
+                {/* Map preview for selected saved address */}
+                {addressMode === 'saved' && selectedAddress && (
+                    <FormField label="Lokasi di Peta">
+                        <MapPicker
+                            value={{
+                                lat: selectedAddress.lat,
+                                lng: selectedAddress.lng,
+                            }}
+                            onChange={handleLocationChange}
+                        />
+                    </FormField>
+                )}
+
+                {/* New address entry */}
+                {addressMode === 'new' && (
+                    <>
+                        <FormField
+                            label="Pilih Lokasi di Peta"
+                            error={form.errors.location as string}
+                            required
+                        >
+                            <MapPicker
+                                value={form.data.location ?? undefined}
+                                onChange={handleLocationChange}
+                            />
+                        </FormField>
+                        <FormField
+                            label="Alamat Lengkap"
+                            htmlFor="address"
+                            error={form.errors.address}
+                            required
+                            description="Sertakan patokan jika perlu"
+                        >
+                            <AddressInput
+                                id="address"
+                                value={form.data.address}
+                                onChange={(value) =>
+                                    form.setData('address', value)
+                                }
+                                disabled={form.processing}
+                            />
+                        </FormField>
+
+                        {/* Save address option for logged-in users */}
+                        {isLoggedIn && (
+                            <div className="space-y-3 rounded-lg border border-dashed p-4">
+                                <div className="flex items-center gap-2">
+                                    <Checkbox
+                                        id="save_address"
+                                        checked={form.data.save_address}
+                                        onCheckedChange={(checked) =>
+                                            form.setData(
+                                                'save_address',
+                                                checked === true,
+                                            )
+                                        }
+                                    />
+                                    <Label
+                                        htmlFor="save_address"
+                                        className="text-sm"
+                                    >
+                                        Simpan alamat ini untuk pemesanan
+                                        berikutnya
+                                    </Label>
+                                </div>
+
+                                {form.data.save_address && (
+                                    <div className="space-y-2">
+                                        <Label className="text-sm">
+                                            Label Alamat{' '}
+                                            <span className="text-destructive">
+                                                *
+                                            </span>
+                                        </Label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {LABEL_PRESETS.map((label) => (
+                                                <Button
+                                                    key={label}
+                                                    type="button"
+                                                    variant={
+                                                        form.data
+                                                            .address_label ===
+                                                            label &&
+                                                        !showCustomLabel
+                                                            ? 'default'
+                                                            : 'outline'
+                                                    }
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        handleLabelPreset(label)
+                                                    }
+                                                >
+                                                    {label}
+                                                </Button>
+                                            ))}
+                                            <Button
+                                                type="button"
+                                                variant={
+                                                    showCustomLabel
+                                                        ? 'default'
+                                                        : 'outline'
+                                                }
+                                                size="sm"
+                                                onClick={
+                                                    handleCustomLabelSelect
+                                                }
+                                            >
+                                                Lainnya
+                                            </Button>
+                                        </div>
+                                        {showCustomLabel && (
+                                            <Input
+                                                placeholder="Masukkan label alamat"
+                                                value={customLabel}
+                                                onChange={(e) => {
+                                                    setCustomLabel(
+                                                        e.target.value,
+                                                    );
+                                                    form.setData(
+                                                        'address_label',
+                                                        e.target.value,
+                                                    );
+                                                }}
+                                                maxLength={50}
+                                            />
+                                        )}
+                                        {form.errors.address_label && (
+                                            <p className="text-xs text-destructive">
+                                                {form.errors.address_label}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </>
+                )}
+
+                {/* Saved address mode - show address as read-only */}
+                {addressMode === 'saved' && selectedAddress && (
+                    <FormField label="Alamat Lengkap" htmlFor="address">
+                        <AddressInput
+                            id="address"
+                            value={form.data.address}
+                            onChange={(value) => form.setData('address', value)}
+                            disabled={form.processing}
+                        />
+                    </FormField>
+                )}
             </FormSection>
 
             {isInstitution && (

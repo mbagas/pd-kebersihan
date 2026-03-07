@@ -380,11 +380,28 @@ class CustomerController extends Controller
     }
 
     /**
-     * Reorder (stub)
+     * Reorder - load previous order data and redirect to order form
      */
     public function reorder(string $order)
     {
-        return redirect()->route('order')->with('success', 'Data pesanan sebelumnya telah dimuat');
+        $orders = $this->getMockOrders();
+        $found = collect($orders)->firstWhere('id', (int) $order);
+
+        if (! $found) {
+            abort(404);
+        }
+
+        $prefill = [
+            'customer_type' => $found['customer_type'] ?? 'household',
+            'name' => $found['customer_name'] ?? '',
+            'phone' => $found['customer_phone'] ?? '',
+            'address' => $found['customer_address'] ?? '',
+            'estimated_volume' => $found['volume_estimate'] ?? 0,
+            'payment_method' => $found['payment_method'] ?? 'cod',
+            'notes' => $found['notes'] ?? '',
+        ];
+
+        return redirect()->route('order')->with('prefill', $prefill);
     }
 
     /**
