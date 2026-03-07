@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
     CheckCircle2,
@@ -7,7 +7,7 @@ import {
     CreditCard,
     Package,
 } from 'lucide-react';
-import { OrderCard } from '@/components/shared';
+import { CustomerOrderCard } from '@/components/customer/CustomerOrderCard';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -61,6 +61,9 @@ export default function Dashboard({
     activeOrders,
     recentOrders,
 }: Props) {
+    const { auth } = usePage().props;
+    const userName = auth.user?.name?.split(' ')[0] ?? 'Pelanggan';
+
     return (
         <CustomerLayout>
             <Head title="Dashboard" />
@@ -69,7 +72,7 @@ export default function Dashboard({
                 {/* Welcome */}
                 <div>
                     <h1 className="text-xl font-bold">
-                        Selamat Datang
+                        Halo, {userName}!
                     </h1>
                     <p className="text-sm text-muted-foreground">
                         Kelola pesanan dan layanan Anda
@@ -137,33 +140,9 @@ export default function Dashboard({
                         </div>
                         <div className="space-y-3">
                             {activeOrders.map((order) => (
-                                <OrderCard
+                                <CustomerOrderCard
                                     key={order.id}
-                                    order={{
-                                        id: order.id,
-                                        order_number:
-                                            order.ticket_number,
-                                        customer_name:
-                                            order.customer_name,
-                                        customer_type:
-                                            order.customer_type,
-                                        customer_address:
-                                            order.customer_address,
-                                        customer_phone:
-                                            order.customer_phone,
-                                        status: order.status,
-                                        payment_status:
-                                            order.payment_status,
-                                        total_amount:
-                                            order.total_price,
-                                        created_at:
-                                            order.created_at,
-                                        updated_at:
-                                            order.created_at,
-                                    }}
-                                    onClick={() =>
-                                        (window.location.href = `/customer/orders/${order.id}`)
-                                    }
+                                    order={order}
                                 />
                             ))}
                         </div>
@@ -187,33 +166,9 @@ export default function Dashboard({
                         </div>
                         <div className="space-y-3">
                             {recentOrders.map((order) => (
-                                <OrderCard
+                                <CustomerOrderCard
                                     key={order.id}
-                                    order={{
-                                        id: order.id,
-                                        order_number:
-                                            order.ticket_number,
-                                        customer_name:
-                                            order.customer_name,
-                                        customer_type:
-                                            order.customer_type,
-                                        customer_address:
-                                            order.customer_address,
-                                        customer_phone:
-                                            order.customer_phone,
-                                        status: order.status,
-                                        payment_status:
-                                            order.payment_status,
-                                        total_amount:
-                                            order.total_price,
-                                        created_at:
-                                            order.created_at,
-                                        updated_at:
-                                            order.created_at,
-                                    }}
-                                    onClick={() =>
-                                        (window.location.href = `/customer/orders/${order.id}`)
-                                    }
+                                    order={order}
                                 />
                             ))}
                         </div>
