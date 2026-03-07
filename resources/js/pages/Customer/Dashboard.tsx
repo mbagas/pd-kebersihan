@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
     CheckCircle2,
@@ -7,7 +7,7 @@ import {
     CreditCard,
     Package,
 } from 'lucide-react';
-import { OrderCard } from '@/components/shared';
+import { CustomerOrderCard } from '@/components/customer/CustomerOrderCard';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -61,6 +61,9 @@ export default function Dashboard({
     activeOrders,
     recentOrders,
 }: Props) {
+    const { auth } = usePage().props;
+    const userName = auth.user?.name?.split(' ')[0] ?? 'Pelanggan';
+
     return (
         <CustomerLayout>
             <Head title="Dashboard" />
@@ -69,7 +72,7 @@ export default function Dashboard({
                 {/* Welcome */}
                 <div>
                     <h1 className="text-xl font-bold">
-                        Selamat Datang
+                        Halo, {userName}!
                     </h1>
                     <p className="text-sm text-muted-foreground">
                         Kelola pesanan dan layanan Anda
@@ -81,20 +84,20 @@ export default function Dashboard({
                     {statCards.map((stat) => {
                         const Icon = stat.icon;
                         return (
-                            <Card key={stat.key}>
-                                <CardContent className="flex items-center gap-3 p-4">
+                            <Card key={stat.key} className="gap-0 py-0">
+                                <CardContent className="flex items-center gap-3 p-3">
                                     <div
-                                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${stat.bg}`}
+                                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${stat.bg}`}
                                     >
                                         <Icon
-                                            className={`h-5 w-5 ${stat.color}`}
+                                            className={`h-4 w-4 ${stat.color}`}
                                         />
                                     </div>
                                     <div>
-                                        <p className="text-2xl font-bold">
+                                        <p className="text-xl font-bold leading-tight">
                                             {stats[stat.key]}
                                         </p>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="text-[11px] text-muted-foreground">
                                             {stat.label}
                                         </p>
                                     </div>
@@ -135,35 +138,11 @@ export default function Dashboard({
                                 <ArrowRight className="h-3 w-3" />
                             </Link>
                         </div>
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {activeOrders.map((order) => (
-                                <OrderCard
+                                <CustomerOrderCard
                                     key={order.id}
-                                    order={{
-                                        id: order.id,
-                                        order_number:
-                                            order.ticket_number,
-                                        customer_name:
-                                            order.customer_name,
-                                        customer_type:
-                                            order.customer_type,
-                                        customer_address:
-                                            order.customer_address,
-                                        customer_phone:
-                                            order.customer_phone,
-                                        status: order.status,
-                                        payment_status:
-                                            order.payment_status,
-                                        total_amount:
-                                            order.total_price,
-                                        created_at:
-                                            order.created_at,
-                                        updated_at:
-                                            order.created_at,
-                                    }}
-                                    onClick={() =>
-                                        (window.location.href = `/customer/orders/${order.id}`)
-                                    }
+                                    order={order}
                                 />
                             ))}
                         </div>
@@ -185,35 +164,11 @@ export default function Dashboard({
                                 <ArrowRight className="h-3 w-3" />
                             </Link>
                         </div>
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {recentOrders.map((order) => (
-                                <OrderCard
+                                <CustomerOrderCard
                                     key={order.id}
-                                    order={{
-                                        id: order.id,
-                                        order_number:
-                                            order.ticket_number,
-                                        customer_name:
-                                            order.customer_name,
-                                        customer_type:
-                                            order.customer_type,
-                                        customer_address:
-                                            order.customer_address,
-                                        customer_phone:
-                                            order.customer_phone,
-                                        status: order.status,
-                                        payment_status:
-                                            order.payment_status,
-                                        total_amount:
-                                            order.total_price,
-                                        created_at:
-                                            order.created_at,
-                                        updated_at:
-                                            order.created_at,
-                                    }}
-                                    onClick={() =>
-                                        (window.location.href = `/customer/orders/${order.id}`)
-                                    }
+                                    order={order}
                                 />
                             ))}
                         </div>

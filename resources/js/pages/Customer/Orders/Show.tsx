@@ -2,13 +2,17 @@ import { Head, Link } from '@inertiajs/react';
 import {
     ArrowLeft,
     Calendar,
+    Camera,
     CheckCircle2,
     Circle,
+    ImageIcon,
     MapPin,
     Phone,
     Truck,
+    Upload,
     User,
 } from 'lucide-react';
+import { useState } from 'react';
 import { PaymentBadge, StatusBadge } from '@/components/shared';
 import { Button } from '@/components/ui/button';
 import {
@@ -90,6 +94,22 @@ function formatCurrency(amount: number) {
 
 export default function OrderShow({ order }: Props) {
     const currentIndex = getStatusIndex(order.status);
+    const [uploadPreview, setUploadPreview] = useState<string | null>(null);
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                setUploadPreview(ev.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const hasEvidence =
+        (order.evidence?.before && order.evidence.before.length > 0) ||
+        (order.evidence?.after && order.evidence.after.length > 0);
 
     return (
         <CustomerLayout>
@@ -271,6 +291,60 @@ export default function OrderShow({ order }: Props) {
                     </Card>
                 )}
 
+                {/* Evidence Photos */}
+                {hasEvidence && (
+                    <Card>
+                        <CardHeader className="pb-3">
+                            <CardTitle className="flex items-center gap-2 text-sm">
+                                <Camera className="h-4 w-4" />
+                                Dokumentasi
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            {order.evidence?.before &&
+                                order.evidence.before.length > 0 && (
+                                    <div>
+                                        <p className="mb-2 text-xs font-medium text-muted-foreground">
+                                            Sebelum
+                                        </p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {order.evidence.before.map(
+                                                (url, i) => (
+                                                    <div
+                                                        key={i}
+                                                        className="flex aspect-video items-center justify-center overflow-hidden rounded-lg bg-muted"
+                                                    >
+                                                        <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
+                                                    </div>
+                                                ),
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            {order.evidence?.after &&
+                                order.evidence.after.length > 0 && (
+                                    <div>
+                                        <p className="mb-2 text-xs font-medium text-muted-foreground">
+                                            Sesudah
+                                        </p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {order.evidence.after.map(
+                                                (url, i) => (
+                                                    <div
+                                                        key={i}
+                                                        className="flex aspect-video items-center justify-center overflow-hidden rounded-lg bg-muted"
+                                                    >
+                                                        <ImageIcon className="h-8 w-8 text-muted-foreground/40" />
+                                                    </div>
+                                                ),
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                        </CardContent>
+                    </Card>
+                )}
+
                 {/* Payment */}
                 <Card>
                     <CardHeader className="pb-3">
@@ -332,12 +406,72 @@ export default function OrderShow({ order }: Props) {
                                 )}
                             </span>
                         </div>
+
+                        {/* Transfer Upload Section */}
+                        {order.payment_method === 'transfer' &&
+                            order.payment_status === 'unpaid' && (
+                                <div className="space-y-3 rounded-lg border border-dashed p-4">
+                                    <p className="text-center text-sm font-medium">
+                                        Upload Bukti Transfer
+                                    </p>
+                                    {uploadPreview ? (
+                                        <div className="space-y-2">
+                                            <img
+                                                src={uploadPreview}
+                                                alt="Preview bukti transfer"
+                                                className="mx-auto max-h-48 rounded-lg object-contain"
+                                            />
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    className="flex-1"
+                                                    onClick={() => {
+                                                        // Mock submit
+                                                        setUploadPreview(null);
+                                                    }}
+                                                >
+                                                    Kirim
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() =>
+                                                        setUploadPreview(null)
+                                                    }
+                                                >
+                                                    Batal
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <label className="flex cursor-pointer flex-col items-center gap-2 rounded-lg bg-muted/50 p-6 transition-colors hover:bg-muted">
+                                            <Upload className="h-8 w-8 text-muted-foreground" />
+                                            <span className="text-xs text-muted-foreground">
+                                                Tap untuk memilih foto
+                                            </span>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={handleFileSelect}
+                                            />
+                                        </label>
+                                    )}
+                                </div>
+                            )}
+
+                        {/* Existing payment proof */}
+                        {order.payment_proof && (
+                            <div className="rounded-lg bg-green-50 p-3 text-sm text-green-700">
+                                Bukti transfer sudah dikirim
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 
                 {/* Actions */}
-                <div className="flex gap-3">
-                    {order.status === 'done' && (
+                {order.status === 'done' && (
+                    <div className="flex gap-3">
                         <Button asChild className="flex-1">
                             <Link
                                 href={`/customer/orders/${order.id}/reorder`}
@@ -347,17 +481,8 @@ export default function OrderShow({ order }: Props) {
                                 Pesan Lagi
                             </Link>
                         </Button>
-                    )}
-                    {order.payment_method === 'transfer' &&
-                        order.payment_status === 'unpaid' && (
-                            <Button
-                                variant="outline"
-                                className="flex-1"
-                            >
-                                Upload Bukti Transfer
-                            </Button>
-                        )}
-                </div>
+                    </div>
+                )}
             </div>
         </CustomerLayout>
     );
