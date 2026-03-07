@@ -1,19 +1,11 @@
-import { Head, Link } from '@inertiajs/react';
-import { ClipboardList, Search, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import {
-    EmptyState,
-    PaymentBadge,
-    StatusBadge,
-} from '@/components/shared';
+import { Head } from '@inertiajs/react';
+import { ClipboardList, Loader2, Search, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { CustomerOrderCard } from '@/components/customer/CustomerOrderCard';
+import { EmptyState } from '@/components/shared';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import CustomerLayout from '@/layouts/CustomerLayout';
 import { cn } from '@/lib/utils';
 import type { CustomerOrder } from '@/types/customer';
@@ -41,20 +33,15 @@ const ACTIVE_STATUSES: OrderStatus[] = [
 
 const ITEMS_PER_PAGE = 10;
 
-function formatDate(dateStr: string) {
-    return new Date(dateStr).toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-    });
-}
+function useDebounce<T>(value: T, delay: number): T {
+    const [debouncedValue, setDebouncedValue] = useState(value);
 
-function formatCurrency(amount: number) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(amount);
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedValue(value), delay);
+        return () => clearTimeout(timer);
+    }, [value, delay]);
+
+    return debouncedValue;
 }
 
 export default function Orders({ orders }: Props) {
@@ -62,6 +49,18 @@ export default function Orders({ orders }: Props) {
     const [search, setSearch] = useState('');
     const [visibleCount, setVisibleCount] =
         useState(ITEMS_PER_PAGE);
+
+    const debouncedSearch = useDebounce(search, 300);
+
+    const { containerRef, isPulling, isRefreshing, pullDistance } =
+        usePullToRefresh({
+            onRefresh: async () => {
+                // In prototype, just simulate a reload delay
+                await new Promise((resolve) =>
+                    setTimeout(resolve, 800),
+                );
+            },
+        });
 
     const filteredOrders = useMemo(() => {
         let result = orders;
@@ -78,8 +77,8 @@ export default function Orders({ orders }: Props) {
         }
 
         // Filter by search
-        if (search.trim()) {
-            const q = search.toLowerCase();
+        if (debouncedSearch.trim()) {
+            const q = debouncedSearch.toLowerCase();
             result = result.filter(
                 (o) =>
                     o.ticket_number
@@ -87,15 +86,12 @@ export default function Orders({ orders }: Props) {
                         .includes(q) ||
                     o.customer_address
                         .toLowerCase()
-                        .includes(q) ||
-                    formatDate(o.created_at)
-                        .toLowerCase()
                         .includes(q),
             );
         }
 
         return result;
-    }, [orders, activeTab, search]);
+    }, [orders, activeTab, debouncedSearch]);
 
     const visibleOrders = filteredOrders.slice(
         0,
@@ -112,7 +108,31 @@ export default function Orders({ orders }: Props) {
         <CustomerLayout>
             <Head title="Pesanan Saya" />
 
-            <div className="space-y-4 p-4">
+            <div ref={containerRef} className="space-y-4 p-4">
+                {/* Pull to Refresh Indicator */}
+                {(isPulling || isRefreshing) && (
+                    <div
+                        className="flex items-center justify-center overflow-hidden transition-all"
+                        style={{
+                            height: isRefreshing
+                                ? 40
+                                : pullDistance * 0.5,
+                        }}
+                    >
+                        <Loader2
+                            className={cn(
+                                'h-5 w-5 text-primary',
+                                isRefreshing && 'animate-spin',
+                            )}
+                        />
+                        <span className="ml-2 text-sm text-muted-foreground">
+                            {isRefreshing
+                                ? 'Memuat ulang...'
+                                : 'Tarik untuk memuat ulang'}
+                        </span>
+                    </div>
+                )}
+
                 <h1 className="text-xl font-bold">
                     Pesanan Saya
                 </h1>
@@ -121,7 +141,7 @@ export default function Orders({ orders }: Props) {
                 <div className="relative">
                     <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                        placeholder="Cari tiket, alamat, tanggal..."
+                        placeholder="Cari tiket atau alamat..."
                         value={search}
                         onChange={(e) => {
                             setSearch(e.target.value);
@@ -164,70 +184,19 @@ export default function Orders({ orders }: Props) {
                 {filteredOrders.length > 0 && (
                     <p className="text-sm text-muted-foreground">
                         {filteredOrders.length} pesanan
-                        {search && ` untuk "${search}"`}
+                        {debouncedSearch &&
+                            ` untuk "${debouncedSearch}"`}
                     </p>
                 )}
 
                 {/* Order Cards */}
                 {visibleOrders.length > 0 ? (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         {visibleOrders.map((order) => (
-                            <Link
+                            <CustomerOrderCard
                                 key={order.id}
-                                href={`/customer/orders/${order.id}`}
-                            >
-                                <Card className="mb-3 transition-shadow hover:shadow-md">
-                                    <CardHeader className="pb-2">
-                                        <div className="flex items-start justify-between">
-                                            <div>
-                                                <p className="text-sm font-medium text-muted-foreground">
-                                                    {
-                                                        order.ticket_number
-                                                    }
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {formatDate(
-                                                        order.created_at,
-                                                    )}
-                                                </p>
-                                            </div>
-                                            <StatusBadge
-                                                status={
-                                                    order.status
-                                                }
-                                            />
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="pb-2">
-                                        <p className="line-clamp-1 text-sm text-muted-foreground">
-                                            {
-                                                order.customer_address
-                                            }
-                                        </p>
-                                        {order.volume_estimate && (
-                                            <p className="mt-1 text-xs text-muted-foreground">
-                                                Volume:{' '}
-                                                {
-                                                    order.volume_estimate
-                                                }{' '}
-                                                m³
-                                            </p>
-                                        )}
-                                    </CardContent>
-                                    <CardFooter className="flex items-center justify-between border-t pt-3">
-                                        <PaymentBadge
-                                            status={
-                                                order.payment_status
-                                            }
-                                        />
-                                        <span className="font-semibold text-primary">
-                                            {formatCurrency(
-                                                order.total_price,
-                                            )}
-                                        </span>
-                                    </CardFooter>
-                                </Card>
-                            </Link>
+                                order={order}
+                            />
                         ))}
 
                         {/* Load More */}
@@ -252,8 +221,8 @@ export default function Orders({ orders }: Props) {
                         icon={ClipboardList}
                         title="Tidak ada pesanan"
                         description={
-                            search
-                                ? `Tidak ditemukan pesanan untuk "${search}"`
+                            debouncedSearch
+                                ? `Tidak ditemukan pesanan untuk "${debouncedSearch}"`
                                 : activeTab === 'active'
                                   ? 'Belum ada pesanan aktif'
                                   : activeTab === 'completed'
