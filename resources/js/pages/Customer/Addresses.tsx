@@ -1,5 +1,11 @@
-import { Head } from '@inertiajs/react';
-import { MapPin, MoreVertical, Plus, Star } from 'lucide-react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import {
+    CheckCircle2,
+    MapPin,
+    MoreVertical,
+    Plus,
+    Star,
+} from 'lucide-react';
 import { EmptyState } from '@/components/shared';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,7 +30,20 @@ interface Props {
 const MAX_ADDRESSES = 5;
 
 export default function Addresses({ addresses }: Props) {
+    const { flash } = usePage<{
+        flash?: { success?: string };
+    }>().props;
     const canAdd = addresses.length < MAX_ADDRESSES;
+
+    const handleSetDefault = (id: number) => {
+        router.put(`/customer/addresses/${id}/default`);
+    };
+
+    const handleDelete = (id: number) => {
+        if (confirm('Yakin ingin menghapus alamat ini?')) {
+            router.delete(`/customer/addresses/${id}`);
+        }
+    };
 
     return (
         <CustomerLayout>
@@ -42,12 +61,26 @@ export default function Addresses({ addresses }: Props) {
                         </p>
                     </div>
                     {canAdd && (
-                        <Button size="sm" className="gap-1">
-                            <Plus className="h-4 w-4" />
-                            Tambah
+                        <Button
+                            asChild
+                            size="sm"
+                            className="gap-1"
+                        >
+                            <Link href="/customer/addresses/create">
+                                <Plus className="h-4 w-4" />
+                                Tambah
+                            </Link>
                         </Button>
                     )}
                 </div>
+
+                {/* Success Flash */}
+                {flash?.success && (
+                    <div className="flex items-center gap-2 rounded-lg bg-green-50 p-3 text-sm text-green-700">
+                        <CheckCircle2 className="h-4 w-4 shrink-0" />
+                        {flash.success}
+                    </div>
+                )}
 
                 {addresses.length > 0 ? (
                     <div className="space-y-3">
@@ -84,16 +117,35 @@ export default function Addresses({ addresses }: Props) {
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
-                                            <DropdownMenuItem>
-                                                Edit
+                                            <DropdownMenuItem
+                                                asChild
+                                            >
+                                                <Link
+                                                    href={`/customer/addresses/${address.id}/edit`}
+                                                >
+                                                    Edit
+                                                </Link>
                                             </DropdownMenuItem>
                                             {!address.is_default && (
-                                                <DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() =>
+                                                        handleSetDefault(
+                                                            address.id,
+                                                        )
+                                                    }
+                                                >
                                                     Jadikan
                                                     Default
                                                 </DropdownMenuItem>
                                             )}
-                                            <DropdownMenuItem className="text-destructive">
+                                            <DropdownMenuItem
+                                                className="text-destructive"
+                                                onClick={() =>
+                                                    handleDelete(
+                                                        address.id,
+                                                    )
+                                                }
+                                            >
                                                 Hapus
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
