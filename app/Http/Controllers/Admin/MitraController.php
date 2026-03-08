@@ -21,16 +21,15 @@ class MitraController extends Controller
     public function index(Request $request): Response
     {
         $mitra = $this->getMockMitra();
-        
+
         // Search
         if ($request->has('search') && $request->search) {
             $search = strtolower($request->search);
-            $mitra = array_filter($mitra, fn($m) => 
-                str_contains(strtolower($m['nama']), $search) ||
+            $mitra = array_filter($mitra, fn ($m) => str_contains(strtolower($m['nama']), $search) ||
                 str_contains(strtolower($m['kontak']), $search)
             );
         }
-        
+
         // Pagination
         $page = $request->get('page', 1);
         $perPage = 10;

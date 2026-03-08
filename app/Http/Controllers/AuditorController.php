@@ -26,12 +26,12 @@ class AuditorController extends Controller
         $customerTypes = ['household', 'institution'];
         $paymentMethods = ['cash', 'transfer'];
         $statuses = ['pending', 'assigned', 'on_the_way', 'arrived', 'processing', 'done', 'cancelled'];
-        
+
         $customerNames = [
             'household' => ['Pak Ahmad', 'Bu Siti', 'Pak Joko', 'Bu Dewi', 'Pak Hendra', 'Bu Rina', 'Pak Bambang', 'Bu Yuni', 'Pak Darmawan', 'Bu Lestari'],
             'institution' => ['PT. Maju Jaya', 'CV. Berkah Abadi', 'RS. Sehat Sentosa', 'Hotel Grand Palace', 'Mall Central', 'Universitas Nusantara', 'Bank Mandiri Cabang Utama', 'Kantor Kecamatan', 'Pabrik Tekstil Indah', 'Restoran Padang Sederhana'],
         ];
-        
+
         $addresses = [
             'Jl. Merdeka No. 10, Kel. Sukamaju',
             'Jl. Sudirman No. 25, Kel. Cempaka',
@@ -50,7 +50,7 @@ class AuditorController extends Controller
 
         $orders = [];
         $baseDate = now()->subMonths(6);
-        
+
         // Generate 150 orders for 6 months of data
         for ($i = 1; $i <= 150; $i++) {
             $customerType = $customerTypes[array_rand($customerTypes)];
@@ -63,27 +63,27 @@ class AuditorController extends Controller
                 'done' => 75,
                 'cancelled' => 5,
             ]);
-            
+
             $paymentMethod = $paymentMethods[array_rand($paymentMethods)];
             $paymentStatus = $status === 'done' ? 'paid' : ($status === 'cancelled' ? 'unpaid' : 'unpaid');
-            
+
             $volume = $customerType === 'household' ? rand(2, 6) : rand(5, 15);
             $pricePerM3 = $customerType === 'household' ? 50000 : 75000;
-            
+
             $createdAt = $baseDate->copy()->addDays(rand(0, 180))->addHours(rand(6, 18));
             $scheduledAt = $createdAt->copy()->addDays(rand(0, 3));
-            
+
             $hasPetugas = in_array($status, ['assigned', 'on_the_way', 'arrived', 'processing', 'done']);
             $petugasIndex = array_rand($petugasNames);
             $mitraIndex = array_rand($mitra);
 
             $orders[] = [
                 'id' => $i,
-                'order_number' => 'ORD-' . str_pad($i, 5, '0', STR_PAD_LEFT),
+                'order_number' => 'ORD-'.str_pad($i, 5, '0', STR_PAD_LEFT),
                 'customer_name' => $customerNames[$customerType][array_rand($customerNames[$customerType])],
                 'customer_type' => $customerType,
                 'customer_address' => $addresses[array_rand($addresses)],
-                'customer_phone' => '08' . rand(1000000000, 9999999999),
+                'customer_phone' => '08'.rand(1000000000, 9999999999),
                 'volume' => $volume,
                 'status' => $status,
                 'payment_method' => $paymentMethod,
@@ -98,20 +98,20 @@ class AuditorController extends Controller
                 'mitra_nama' => $hasPetugas ? $mitra[$mitraIndex]['nama'] : null,
                 'mitra_id' => $hasPetugas ? $mitra[$mitraIndex]['id'] : null,
                 'armada_plat' => $hasPetugas ? $armadaPlats[$petugasIndex] : null,
-                'foto_before' => $status === 'done' ? '/storage/photos/before-' . $i . '.jpg' : null,
-                'foto_after' => $status === 'done' ? '/storage/photos/after-' . $i . '.jpg' : null,
+                'foto_before' => $status === 'done' ? '/storage/photos/before-'.$i.'.jpg' : null,
+                'foto_after' => $status === 'done' ? '/storage/photos/after-'.$i.'.jpg' : null,
                 'timeline' => [
                     'assigned_at' => $hasPetugas ? $createdAt->copy()->addMinutes(rand(5, 30))->format('Y-m-d H:i:s') : null,
                     'arrived_at' => in_array($status, ['arrived', 'processing', 'done']) ? $scheduledAt->copy()->addMinutes(rand(30, 90))->format('Y-m-d H:i:s') : null,
                     'completed_at' => $status === 'done' ? $scheduledAt->copy()->addHours(rand(1, 4))->format('Y-m-d H:i:s') : null,
                 ],
                 'gps_validated' => $status === 'done' ? (rand(0, 10) > 2) : false,
-                'notes' => rand(0, 3) === 0 ? 'Catatan untuk order #' . $i : null,
+                'notes' => rand(0, 3) === 0 ? 'Catatan untuk order #'.$i : null,
             ];
         }
 
-        usort($orders, fn($a, $b) => strtotime($b['created_at']) - strtotime($a['created_at']));
-        
+        usort($orders, fn ($a, $b) => strtotime($b['created_at']) - strtotime($a['created_at']));
+
         return $orders;
     }
 
@@ -120,14 +120,14 @@ class AuditorController extends Controller
         $total = array_sum($weights);
         $rand = rand(1, $total);
         $current = 0;
-        
+
         foreach ($weights as $key => $weight) {
             $current += $weight;
             if ($rand <= $current) {
                 return $key;
             }
         }
-        
+
         return array_key_first($weights);
     }
 
@@ -135,36 +135,35 @@ class AuditorController extends Controller
     {
         $orders = $this->getMockOrders();
         $currentMonth = now()->format('Y-m');
-        
+
         // Filter orders bulan ini
-        $monthOrders = array_filter($orders, fn($o) => str_starts_with($o['created_at'], $currentMonth));
-        $doneOrders = array_filter($monthOrders, fn($o) => $o['status'] === 'done');
-        
+        $monthOrders = array_filter($orders, fn ($o) => str_starts_with($o['created_at'], $currentMonth));
+        $doneOrders = array_filter($monthOrders, fn ($o) => $o['status'] === 'done');
+
         // Stats
         $totalOrderBulanIni = count($monthOrders);
-        $totalPendapatan = array_sum(array_map(fn($o) => $o['payment_status'] === 'paid' ? $o['total_amount'] : 0, $monthOrders));
-        $totalVolume = array_sum(array_map(fn($o) => $o['status'] === 'done' ? $o['volume'] : 0, $monthOrders));
+        $totalPendapatan = array_sum(array_map(fn ($o) => $o['payment_status'] === 'paid' ? $o['total_amount'] : 0, $monthOrders));
+        $totalVolume = array_sum(array_map(fn ($o) => $o['status'] === 'done' ? $o['volume'] : 0, $monthOrders));
         $daysInMonth = now()->daysInMonth;
         $rataRataOrderPerHari = $totalOrderBulanIni > 0 ? round($totalOrderBulanIni / $daysInMonth, 1) : 0;
 
         // Order Distribution (Pusat vs Mitra)
-        $pusatOrders = count(array_filter($doneOrders, fn($o) => $o['mitra_id'] === 1));
+        $pusatOrders = count(array_filter($doneOrders, fn ($o) => $o['mitra_id'] === 1));
         $mitraOrders = count($doneOrders) - $pusatOrders;
-        
+
         // Monthly Revenue (6 bulan terakhir)
         $monthlyRevenue = [];
         for ($i = 5; $i >= 0; $i--) {
             $month = now()->subMonths($i);
             $monthKey = $month->format('Y-m');
             $monthLabel = $month->translatedFormat('M Y');
-            
-            $monthData = array_filter($orders, fn($o) => 
-                str_starts_with($o['created_at'], $monthKey) && $o['payment_status'] === 'paid'
+
+            $monthData = array_filter($orders, fn ($o) => str_starts_with($o['created_at'], $monthKey) && $o['payment_status'] === 'paid'
             );
-            
+
             $monthlyRevenue[] = [
                 'month' => $monthLabel,
-                'pendapatan' => array_sum(array_map(fn($o) => $o['total_amount'], $monthData)),
+                'pendapatan' => array_sum(array_map(fn ($o) => $o['total_amount'], $monthData)),
             ];
         }
 
@@ -173,9 +172,9 @@ class AuditorController extends Controller
         for ($i = 29; $i >= 0; $i--) {
             $date = now()->subDays($i);
             $dateKey = $date->format('Y-m-d');
-            
-            $dayOrders = array_filter($orders, fn($o) => str_starts_with($o['created_at'], $dateKey));
-            
+
+            $dayOrders = array_filter($orders, fn ($o) => str_starts_with($o['created_at'], $dateKey));
+
             $dailyTrend[] = [
                 'date' => $date->format('d M'),
                 'orders' => count($dayOrders),
@@ -201,30 +200,34 @@ class AuditorController extends Controller
     public function peta(Request $request): Response
     {
         $orders = $this->getMockOrders();
-        
+
         // Filter by date range
         $startDate = $request->get('start_date', now()->subDays(30)->format('Y-m-d'));
         $endDate = $request->get('end_date', now()->format('Y-m-d'));
-        
-        $filteredOrders = array_filter($orders, function($o) use ($startDate, $endDate, $request) {
+
+        $filteredOrders = array_filter($orders, function ($o) use ($startDate, $endDate, $request) {
             $orderDate = substr($o['created_at'], 0, 10);
             $inDateRange = $orderDate >= $startDate && $orderDate <= $endDate;
-            
+
             // Filter by status
             if ($request->has('status') && $request->status !== 'all') {
-                if ($o['status'] !== $request->status) return false;
+                if ($o['status'] !== $request->status) {
+                    return false;
+                }
             }
-            
+
             // Filter by customer type
             if ($request->has('customer_type') && $request->customer_type !== 'all') {
-                if ($o['customer_type'] !== $request->customer_type) return false;
+                if ($o['customer_type'] !== $request->customer_type) {
+                    return false;
+                }
             }
-            
+
             return $inDateRange && $o['latitude'] && $o['longitude'];
         });
 
         // Map orders for frontend (only needed fields)
-        $mapOrders = array_map(fn($o) => [
+        $mapOrders = array_map(fn ($o) => [
             'id' => $o['id'],
             'order_number' => $o['order_number'],
             'customer_name' => $o['customer_name'],
@@ -253,34 +256,35 @@ class AuditorController extends Controller
     {
         $orders = $this->getMockOrders();
         $mitra = $this->getMockMitra();
-        
+
         // Filter by date range
         $startDate = $request->get('start_date', now()->startOfMonth()->format('Y-m-d'));
         $endDate = $request->get('end_date', now()->format('Y-m-d'));
-        
-        $filteredOrders = array_filter($orders, function($o) use ($startDate, $endDate) {
+
+        $filteredOrders = array_filter($orders, function ($o) use ($startDate, $endDate) {
             $orderDate = substr($o['created_at'], 0, 10);
+
             return $orderDate >= $startDate && $orderDate <= $endDate && $o['status'] === 'done';
         });
         $filteredOrders = array_values($filteredOrders);
 
         // Summary
         $summary = [
-            'total_pendapatan' => array_sum(array_map(fn($o) => $o['total_amount'], $filteredOrders)),
+            'total_pendapatan' => array_sum(array_map(fn ($o) => $o['total_amount'], $filteredOrders)),
             'total_orders' => count($filteredOrders),
-            'total_volume' => array_sum(array_map(fn($o) => $o['volume'], $filteredOrders)),
+            'total_volume' => array_sum(array_map(fn ($o) => $o['volume'], $filteredOrders)),
         ];
 
         // Breakdown per Mitra
         $mitraBreakdown = [];
         foreach ($mitra as $m) {
-            $mitraOrders = array_filter($filteredOrders, fn($o) => $o['mitra_id'] === $m['id']);
+            $mitraOrders = array_filter($filteredOrders, fn ($o) => $o['mitra_id'] === $m['id']);
             $mitraBreakdown[] = [
                 'mitra_id' => $m['id'],
                 'mitra_nama' => $m['nama'],
                 'total_orders' => count($mitraOrders),
-                'total_pendapatan' => array_sum(array_map(fn($o) => $o['total_amount'], $mitraOrders)),
-                'total_volume' => array_sum(array_map(fn($o) => $o['volume'], $mitraOrders)),
+                'total_pendapatan' => array_sum(array_map(fn ($o) => $o['total_amount'], $mitraOrders)),
+                'total_volume' => array_sum(array_map(fn ($o) => $o['volume'], $mitraOrders)),
             ];
         }
 
@@ -289,14 +293,14 @@ class AuditorController extends Controller
             [
                 'customer_type' => 'household',
                 'label' => 'Rumah Tangga',
-                'total_orders' => count(array_filter($filteredOrders, fn($o) => $o['customer_type'] === 'household')),
-                'total_pendapatan' => array_sum(array_map(fn($o) => $o['customer_type'] === 'household' ? $o['total_amount'] : 0, $filteredOrders)),
+                'total_orders' => count(array_filter($filteredOrders, fn ($o) => $o['customer_type'] === 'household')),
+                'total_pendapatan' => array_sum(array_map(fn ($o) => $o['customer_type'] === 'household' ? $o['total_amount'] : 0, $filteredOrders)),
             ],
             [
                 'customer_type' => 'institution',
                 'label' => 'Instansi',
-                'total_orders' => count(array_filter($filteredOrders, fn($o) => $o['customer_type'] === 'institution')),
-                'total_pendapatan' => array_sum(array_map(fn($o) => $o['customer_type'] === 'institution' ? $o['total_amount'] : 0, $filteredOrders)),
+                'total_orders' => count(array_filter($filteredOrders, fn ($o) => $o['customer_type'] === 'institution')),
+                'total_pendapatan' => array_sum(array_map(fn ($o) => $o['customer_type'] === 'institution' ? $o['total_amount'] : 0, $filteredOrders)),
             ],
         ];
 
@@ -305,14 +309,14 @@ class AuditorController extends Controller
             [
                 'payment_method' => 'cash',
                 'label' => 'Tunai',
-                'total_orders' => count(array_filter($filteredOrders, fn($o) => $o['payment_method'] === 'cash')),
-                'total_pendapatan' => array_sum(array_map(fn($o) => $o['payment_method'] === 'cash' ? $o['total_amount'] : 0, $filteredOrders)),
+                'total_orders' => count(array_filter($filteredOrders, fn ($o) => $o['payment_method'] === 'cash')),
+                'total_pendapatan' => array_sum(array_map(fn ($o) => $o['payment_method'] === 'cash' ? $o['total_amount'] : 0, $filteredOrders)),
             ],
             [
                 'payment_method' => 'transfer',
                 'label' => 'Transfer',
-                'total_orders' => count(array_filter($filteredOrders, fn($o) => $o['payment_method'] === 'transfer')),
-                'total_pendapatan' => array_sum(array_map(fn($o) => $o['payment_method'] === 'transfer' ? $o['total_amount'] : 0, $filteredOrders)),
+                'total_orders' => count(array_filter($filteredOrders, fn ($o) => $o['payment_method'] === 'transfer')),
+                'total_pendapatan' => array_sum(array_map(fn ($o) => $o['payment_method'] === 'transfer' ? $o['total_amount'] : 0, $filteredOrders)),
             ],
         ];
 
@@ -331,39 +335,45 @@ class AuditorController extends Controller
     public function trail(Request $request): Response
     {
         $orders = $this->getMockOrders();
-        
+
         // Filter by date range
         $startDate = $request->get('start_date', now()->subDays(30)->format('Y-m-d'));
         $endDate = $request->get('end_date', now()->format('Y-m-d'));
-        
-        $filteredOrders = array_filter($orders, function($o) use ($startDate, $endDate, $request) {
+
+        $filteredOrders = array_filter($orders, function ($o) use ($startDate, $endDate, $request) {
             $orderDate = substr($o['created_at'], 0, 10);
             $inDateRange = $orderDate >= $startDate && $orderDate <= $endDate;
-            
+
             // Filter by status
             if ($request->has('status') && $request->status !== 'all') {
-                if ($o['status'] !== $request->status) return false;
+                if ($o['status'] !== $request->status) {
+                    return false;
+                }
             }
-            
+
             // Filter by customer type
             if ($request->has('customer_type') && $request->customer_type !== 'all') {
-                if ($o['customer_type'] !== $request->customer_type) return false;
+                if ($o['customer_type'] !== $request->customer_type) {
+                    return false;
+                }
             }
-            
+
             // Search
             if ($request->has('search') && $request->search) {
                 $search = strtolower($request->search);
                 $matchesSearch = str_contains(strtolower($o['order_number']), $search) ||
                     str_contains(strtolower($o['customer_name']), $search) ||
                     str_contains(strtolower($o['customer_address']), $search);
-                if (!$matchesSearch) return false;
+                if (! $matchesSearch) {
+                    return false;
+                }
             }
-            
+
             return $inDateRange;
         });
 
         $filteredOrders = array_values($filteredOrders);
-        
+
         // Pagination
         $page = $request->get('page', 1);
         $perPage = 15;

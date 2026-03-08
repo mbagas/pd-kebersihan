@@ -21,6 +21,7 @@ class PetugasController extends Controller
     private function getMockArmada(): array
     {
         $mitra = $this->getMockMitra();
+
         return [
             ['id' => 1, 'plat_nomor' => 'B 1234 ABC', 'kapasitas' => 6, 'status' => 'available', 'mitra_id' => 1, 'mitra' => $mitra[0]],
             ['id' => 2, 'plat_nomor' => 'B 5678 DEF', 'kapasitas' => 8, 'status' => 'in_use', 'mitra_id' => 1, 'mitra' => $mitra[0]],
@@ -34,6 +35,7 @@ class PetugasController extends Controller
     {
         $mitra = $this->getMockMitra();
         $armada = $this->getMockArmada();
+
         return [
             ['id' => 1, 'nama' => 'Budi Santoso', 'kontak' => '081111111111', 'mitra_id' => 1, 'mitra' => $mitra[0], 'armada_id' => 1, 'armada' => $armada[0], 'status_aktif' => true, 'saldo_hutang' => 0, 'created_at' => '2026-01-01 08:00:00', 'updated_at' => '2026-01-01 08:00:00'],
             ['id' => 2, 'nama' => 'Agus Wijaya', 'kontak' => '081222222222', 'mitra_id' => 1, 'mitra' => $mitra[0], 'armada_id' => 2, 'armada' => $armada[1], 'status_aktif' => true, 'saldo_hutang' => 150000, 'created_at' => '2026-01-02 08:00:00', 'updated_at' => '2026-02-15 16:00:00'],
@@ -48,27 +50,26 @@ class PetugasController extends Controller
     {
         $petugas = $this->getMockPetugas();
         $mitra = $this->getMockMitra();
-        
+
         // Search
         if ($request->has('search') && $request->search) {
             $search = strtolower($request->search);
-            $petugas = array_filter($petugas, fn($p) => 
-                str_contains(strtolower($p['nama']), $search) ||
+            $petugas = array_filter($petugas, fn ($p) => str_contains(strtolower($p['nama']), $search) ||
                 str_contains(strtolower($p['kontak']), $search)
             );
         }
-        
+
         // Filter by mitra
         if ($request->has('mitra_id') && $request->mitra_id !== 'all') {
-            $petugas = array_filter($petugas, fn($p) => $p['mitra_id'] == $request->mitra_id);
+            $petugas = array_filter($petugas, fn ($p) => $p['mitra_id'] == $request->mitra_id);
         }
-        
+
         // Filter by status
         if ($request->has('status') && $request->status !== 'all') {
             $isActive = $request->status === 'active';
-            $petugas = array_filter($petugas, fn($p) => $p['status_aktif'] === $isActive);
+            $petugas = array_filter($petugas, fn ($p) => $p['status_aktif'] === $isActive);
         }
-        
+
         // Pagination
         $page = $request->get('page', 1);
         $perPage = 10;
@@ -111,6 +112,7 @@ class PetugasController extends Controller
     public function show(string $id): Response
     {
         $petugas = collect($this->getMockPetugas())->firstWhere('id', (int) $id);
+
         return Inertia::render('Admin/Master/Petugas/Show', [
             'petugas' => $petugas,
         ]);
@@ -119,6 +121,7 @@ class PetugasController extends Controller
     public function edit(string $id): Response
     {
         $petugas = collect($this->getMockPetugas())->firstWhere('id', (int) $id);
+
         return Inertia::render('Admin/Master/Petugas/Edit', [
             'petugas' => $petugas,
             'mitra' => $this->getMockMitra(),
