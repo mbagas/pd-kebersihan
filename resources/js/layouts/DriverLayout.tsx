@@ -8,7 +8,7 @@ import {
     WifiOff,
 } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
-import { InstallBanner } from '@/components/shared/install-banner';
+import { InstallBanner } from '@/components/shared/InstallBanner';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useOnlineStatus } from '@/hooks/use-online-status';
 import { cn } from '@/lib/utils';
