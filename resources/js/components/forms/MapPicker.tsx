@@ -94,7 +94,9 @@ export function MapPicker({
 
     // Initialize map
     useEffect(() => {
-        if (!mapRef.current || mapInstanceRef.current) return;
+        if (!mapRef.current) return;
+
+        let aborted = false;
 
         const initMap = async () => {
             // Dynamic import Leaflet
@@ -103,6 +105,9 @@ export function MapPicker({
                 // Import CSS
                 await import('leaflet/dist/leaflet.css');
             }
+
+            // Bail out if cleanup already ran (React strict mode)
+            if (aborted) return;
 
             // Fix default marker icon
             delete (
@@ -150,6 +155,7 @@ export function MapPicker({
         initMap();
 
         return () => {
+            aborted = true;
             if (mapInstanceRef.current) {
                 mapInstanceRef.current.remove();
                 mapInstanceRef.current = null;
