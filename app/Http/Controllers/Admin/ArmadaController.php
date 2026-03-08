@@ -21,6 +21,7 @@ class ArmadaController extends Controller
     private function getMockArmada(): array
     {
         $mitra = $this->getMockMitra();
+
         return [
             ['id' => 1, 'plat_nomor' => 'B 1234 ABC', 'kapasitas' => 6, 'status' => 'available', 'mitra_id' => 1, 'mitra' => $mitra[0], 'created_at' => '2026-01-01 08:00:00', 'updated_at' => '2026-01-01 08:00:00'],
             ['id' => 2, 'plat_nomor' => 'B 5678 DEF', 'kapasitas' => 8, 'status' => 'in_use', 'mitra_id' => 1, 'mitra' => $mitra[0], 'created_at' => '2026-01-02 08:00:00', 'updated_at' => '2026-02-16 09:00:00'],
@@ -34,20 +35,19 @@ class ArmadaController extends Controller
     {
         $armada = $this->getMockArmada();
         $mitra = $this->getMockMitra();
-        
+
         // Search
         if ($request->has('search') && $request->search) {
             $search = strtolower($request->search);
-            $armada = array_filter($armada, fn($a) => 
-                str_contains(strtolower($a['plat_nomor']), $search)
+            $armada = array_filter($armada, fn ($a) => str_contains(strtolower($a['plat_nomor']), $search)
             );
         }
-        
+
         // Filter by status
         if ($request->has('status') && $request->status !== 'all') {
-            $armada = array_filter($armada, fn($a) => $a['status'] === $request->status);
+            $armada = array_filter($armada, fn ($a) => $a['status'] === $request->status);
         }
-        
+
         // Pagination
         $page = $request->get('page', 1);
         $perPage = 10;

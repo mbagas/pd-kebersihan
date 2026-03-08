@@ -1,13 +1,13 @@
 <?php
 
-use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Admin\ArmadaController;
 use App\Http\Controllers\Admin\MitraController;
 use App\Http\Controllers\Admin\PetugasController;
 use App\Http\Controllers\Admin\TarifController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuditorController;
-use App\Http\Controllers\DriverController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DriverController;
 use App\Http\Controllers\PublicController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,7 +36,7 @@ Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin'])->group(fu
     Route::resource('master/mitra', MitraController::class)->names('admin.mitra')->only(['index', 'store', 'update', 'destroy']);
     Route::resource('master/armada', ArmadaController::class)->names('admin.armada')->only(['index', 'store', 'update', 'destroy']);
     Route::resource('master/tarif', TarifController::class)->names('admin.tarif')->only(['index', 'update']);
-    
+
     // Master Data - Page CRUD (full resource)
     Route::resource('master/petugas', PetugasController::class)->names('admin.petugas');
 });
@@ -62,6 +62,8 @@ Route::prefix('app')->middleware(['auth', 'verified', 'role:driver'])->group(fun
 */
 Route::prefix('customer')->middleware(['auth', 'verified', 'role:customer'])->name('customer.')->group(function () {
     Route::get('/', [CustomerController::class, 'dashboard'])->name('dashboard');
+    Route::get('/order', [CustomerController::class, 'order'])->name('order');
+    Route::post('/order', [CustomerController::class, 'storeOrder'])->name('order.store');
     Route::get('/orders', [CustomerController::class, 'orders'])->name('orders');
     Route::get('/orders/{order}', [CustomerController::class, 'orderDetail'])->name('orders.show');
     Route::post('/orders/{order}/reorder', [CustomerController::class, 'reorder'])->name('orders.reorder');

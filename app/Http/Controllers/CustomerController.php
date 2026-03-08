@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\StoreOrder;
 use App\Models\CustomerAddress;
 use App\Models\CustomerProfile;
 use Illuminate\Http\RedirectResponse;
@@ -380,9 +381,48 @@ class CustomerController extends Controller
     }
 
     /**
+     * Order form - /customer/order
+     */
+    public function order(Request $request): Response
+    {
+        $user = $request->user();
+
+        $props = [
+            'tariff' => StoreOrder::tariff(),
+            'addresses' => $user->customerAddresses()
+                ->orderByDesc('is_default')
+                ->orderBy('label')
+                ->get(),
+            'profile' => $user->customerProfile,
+        ];
+
+        // Reorder prefill from session (flashed by reorder method)
+        if ($request->session()->has('prefill')) {
+            $props['prefill'] = $request->session()->get('prefill');
+        }
+
+        return Inertia::render('Customer/Order', $props);
+    }
+
+    /**
+     * Store order - POST /customer/order
+     */
+    public function storeOrder(Request $request): RedirectResponse
+    {
+        $validated = $request->validate(StoreOrder::rules());
+
+        (new StoreOrder)->execute($validated, $request->user());
+
+        // TODO: Create actual order record (Issue #19 - Order Schema)
+        // For now, redirect to orders list with success message
+        return redirect()->route('customer.orders')
+            ->with('success', 'Order berhasil dibuat');
+    }
+
+    /**
      * Reorder - load previous order data and redirect to order form
      */
-    public function reorder(string $order)
+    public function reorder(string $order): RedirectResponse
     {
         $orders = $this->getMockOrders();
         $found = collect($orders)->firstWhere('id', (int) $order);
@@ -401,7 +441,7 @@ class CustomerController extends Controller
             'notes' => $found['notes'] ?? '',
         ];
 
-        return redirect()->route('order')->with('prefill', $prefill);
+        return redirect()->route('customer.order')->with('prefill', $prefill);
     }
 
     /**

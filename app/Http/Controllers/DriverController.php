@@ -180,9 +180,10 @@ class DriverController extends Controller
         if ($filter === 'today') {
             $today = date('Y-m-d');
             $tasks = array_filter($tasks, function ($task) use ($today) {
-                $scheduledDate = isset($task['scheduled_at']) 
-                    ? date('Y-m-d', strtotime($task['scheduled_at'])) 
+                $scheduledDate = isset($task['scheduled_at'])
+                    ? date('Y-m-d', strtotime($task['scheduled_at']))
                     : date('Y-m-d', strtotime($task['created_at']));
+
                 return $scheduledDate === $today;
             });
         }
@@ -201,7 +202,7 @@ class DriverController extends Controller
         $tasks = array_merge($this->getMockTasks(), $this->getMockRiwayat());
         $task = collect($tasks)->firstWhere('id', (int) $id);
 
-        if (!$task) {
+        if (! $task) {
             abort(404);
         }
 

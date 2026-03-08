@@ -1,6 +1,6 @@
 import type * as LeafletType from 'leaflet';
 import { MapPin, Navigation, Search, X } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -35,6 +35,15 @@ export function MapPicker({
     defaultZoom = DEFAULT_ZOOM,
     placeholder = 'Cari alamat...',
 }: MapPickerProps) {
+    // Coerce lat/lng to numbers (Laravel decimal casts return strings)
+    const normalizedValue = useMemo(
+        () =>
+            value
+                ? { ...value, lat: Number(value.lat), lng: Number(value.lng) }
+                : undefined,
+        [value],
+    );
+
     const mapRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<LeafletType.Map | null>(null);
     const markerRef = useRef<LeafletType.Marker | null>(null);
@@ -85,7 +94,9 @@ export function MapPicker({
 
     // Initialize map
     useEffect(() => {
-        if (!mapRef.current || mapInstanceRef.current) return;
+        if (!mapRef.current) return;
+
+        let aborted = false;
 
         const initMap = async () => {
             // Dynamic import Leaflet
@@ -94,6 +105,9 @@ export function MapPicker({
                 // Import CSS
                 await import('leaflet/dist/leaflet.css');
             }
+
+            // Bail out if cleanup already ran (React strict mode)
+            if (aborted) return;
 
             // Fix default marker icon
             delete (
@@ -108,8 +122,8 @@ export function MapPicker({
                     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
             });
 
-            const initialCenter = value
-                ? [value.lat, value.lng]
+            const initialCenter = normalizedValue
+                ? [normalizedValue.lat, normalizedValue.lng]
                 : defaultCenter;
 
             const map = L.map(mapRef.current!, {
@@ -123,8 +137,8 @@ export function MapPicker({
             }).addTo(map);
 
             // Add marker if value exists
-            if (value) {
-                markerRef.current = L.marker([value.lat, value.lng], {
+            if (normalizedValue) {
+                markerRef.current = L.marker([normalizedValue.lat, normalizedValue.lng], {
                     draggable: true,
                 }).addTo(map);
 
@@ -141,6 +155,7 @@ export function MapPicker({
         initMap();
 
         return () => {
+            aborted = true;
             if (mapInstanceRef.current) {
                 mapInstanceRef.current.remove();
                 mapInstanceRef.current = null;
@@ -153,18 +168,18 @@ export function MapPicker({
     useEffect(() => {
         if (!isMapReady || !L || !mapInstanceRef.current) return;
 
-        if (value) {
+        if (normalizedValue) {
             if (markerRef.current) {
-                markerRef.current.setLatLng([value.lat, value.lng]);
+                markerRef.current.setLatLng([normalizedValue.lat, normalizedValue.lng]);
             } else {
-                markerRef.current = L.marker([value.lat, value.lng], {
+                markerRef.current = L.marker([normalizedValue.lat, normalizedValue.lng], {
                     draggable: true,
                 }).addTo(mapInstanceRef.current);
                 markerRef.current.on('dragend', handleMarkerDrag);
             }
-            mapInstanceRef.current.setView([value.lat, value.lng]);
+            mapInstanceRef.current.setView([normalizedValue.lat, normalizedValue.lng]);
         }
-    }, [value, isMapReady, handleMarkerDrag]);
+    }, [normalizedValue, isMapReady, handleMarkerDrag]);
 
     // Search address using Nominatim
     const handleSearch = async () => {
@@ -264,10 +279,10 @@ export function MapPicker({
     };
 
     return (
-        <div className={cn('space-y-3', className)}>
+        <div className={cn('min-w-0 space-y-3', className)}>
             {/* Search bar */}
             <div className="flex gap-2">
-                <div className="relative flex-1">
+                <div className="relative min-w-0 flex-1">
                     <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                         type="text"
@@ -281,15 +296,24 @@ export function MapPicker({
                 <Button
                     type="button"
                     variant="outline"
+                    size="icon"
+                    className="shrink-0"
                     onClick={handleSearch}
                     disabled={isSearching}
+                    title="Cari alamat"
                 >
-                    {isSearching ? 'Mencari...' : 'Cari'}
+                    <Search
+                        className={cn(
+                            'h-4 w-4',
+                            isSearching && 'animate-pulse',
+                        )}
+                    />
                 </Button>
                 <Button
                     type="button"
                     variant="outline"
                     size="icon"
+                    className="shrink-0"
                     onClick={handleGetLocation}
                     disabled={isLocating}
                     title="Gunakan lokasi saat ini"
@@ -311,18 +335,18 @@ export function MapPicker({
             />
 
             {/* Selected location info */}
-            {value && (
+            {normalizedValue && (
                 <div className="flex items-start gap-2 rounded-lg bg-muted p-3">
                     <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                     <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium">Lokasi Terpilih</p>
                         <p className="truncate text-xs text-muted-foreground">
-                            {value.address ||
-                                `${value.lat.toFixed(6)}, ${value.lng.toFixed(6)}`}
+                            {normalizedValue.address ||
+                                `${normalizedValue.lat.toFixed(6)}, ${normalizedValue.lng.toFixed(6)}`}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                            Koordinat: {value.lat.toFixed(6)},{' '}
-                            {value.lng.toFixed(6)}
+                            Koordinat: {normalizedValue.lat.toFixed(6)},{' '}
+                            {normalizedValue.lng.toFixed(6)}
                         </p>
                     </div>
                     <Button

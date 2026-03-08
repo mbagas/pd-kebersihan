@@ -23,6 +23,7 @@ class AdminController extends Controller
     private function getMockArmada(): array
     {
         $mitra = $this->getMockMitra();
+
         return [
             ['id' => 1, 'plat_nomor' => 'B 1234 ABC', 'kapasitas' => 6, 'status' => 'available', 'mitra_id' => 1, 'mitra' => $mitra[0], 'created_at' => '2026-01-01 08:00:00', 'updated_at' => '2026-01-01 08:00:00'],
             ['id' => 2, 'plat_nomor' => 'B 5678 DEF', 'kapasitas' => 8, 'status' => 'in_use', 'mitra_id' => 1, 'mitra' => $mitra[0], 'created_at' => '2026-01-02 08:00:00', 'updated_at' => '2026-02-16 09:00:00'],
@@ -36,6 +37,7 @@ class AdminController extends Controller
     {
         $mitra = $this->getMockMitra();
         $armada = $this->getMockArmada();
+
         return [
             ['id' => 1, 'nama' => 'Budi Santoso', 'kontak' => '081111111111', 'mitra_id' => 1, 'mitra' => $mitra[0], 'armada_id' => 1, 'armada' => $armada[0], 'status_aktif' => true, 'saldo_hutang' => 0, 'created_at' => '2026-01-01 08:00:00', 'updated_at' => '2026-01-01 08:00:00'],
             ['id' => 2, 'nama' => 'Agus Wijaya', 'kontak' => '081222222222', 'mitra_id' => 1, 'mitra' => $mitra[0], 'armada_id' => 2, 'armada' => $armada[1], 'status_aktif' => true, 'saldo_hutang' => 150000, 'created_at' => '2026-01-02 08:00:00', 'updated_at' => '2026-02-15 16:00:00'],
@@ -58,18 +60,18 @@ class AdminController extends Controller
     {
         $petugas = $this->getMockPetugas();
         $armada = $this->getMockArmada();
-        
+
         $customerTypes = ['household', 'institution'];
         $paymentMethods = ['cash', 'transfer'];
-        
+
         $orders = [];
         $baseDate = now()->subDays(14);
-        
+
         $customerNames = [
             'household' => ['Pak Ahmad', 'Bu Siti', 'Pak Joko', 'Bu Dewi', 'Pak Hendra', 'Bu Rina', 'Pak Bambang', 'Bu Yuni', 'Pak Darmawan', 'Bu Lestari'],
             'institution' => ['PT. Maju Jaya', 'CV. Berkah Abadi', 'RS. Sehat Sentosa', 'Hotel Grand Palace', 'Mall Central', 'Universitas Nusantara', 'Bank Mandiri Cabang Utama', 'Kantor Kecamatan', 'Pabrik Tekstil Indah', 'Restoran Padang Sederhana'],
         ];
-        
+
         $addresses = [
             'Jl. Merdeka No. 10, Kel. Sukamaju',
             'Jl. Sudirman No. 25, Kel. Cempaka',
@@ -92,16 +94,16 @@ class AdminController extends Controller
                 'done' => 45,
                 'cancelled' => 5,
             ]);
-            
+
             // Payment method is chosen at order creation
             $paymentMethod = $paymentMethods[array_rand($paymentMethods)];
-            
+
             // Determine payment status and cash collection status based on order status and payment method
             $paymentStatus = 'unpaid';
             $cashCollectionStatus = $paymentMethod === 'cash' ? 'pending' : 'not_applicable';
             $buktiTransfer = null;
             $setoranId = null;
-            
+
             if ($status === 'cancelled') {
                 $paymentStatus = 'unpaid';
                 $cashCollectionStatus = $paymentMethod === 'cash' ? 'pending' : 'not_applicable';
@@ -109,12 +111,12 @@ class AdminController extends Controller
                 // Transfer flow: unpaid -> pending_verification (bukti uploaded) -> paid (verified)
                 if ($status === 'done') {
                     $paymentStatus = 'paid';
-                    $buktiTransfer = '/storage/bukti/transfer-' . $i . '.jpg';
+                    $buktiTransfer = '/storage/bukti/transfer-'.$i.'.jpg';
                 } elseif (in_array($status, ['assigned', 'processing'])) {
                     // Some have uploaded bukti, some haven't
                     if (rand(0, 1)) {
                         $paymentStatus = 'pending_verification';
-                        $buktiTransfer = '/storage/bukti/transfer-' . $i . '.jpg';
+                        $buktiTransfer = '/storage/bukti/transfer-'.$i.'.jpg';
                     }
                 }
             } else {
@@ -135,16 +137,16 @@ class AdminController extends Controller
                     $cashCollectionStatus = rand(0, 1) ? 'collected' : 'pending';
                 }
             }
-            
+
             $volume = $customerType === 'household' ? rand(2, 6) : rand(5, 15);
             $pricePerM3 = $customerType === 'household' ? 50000 : 75000;
-            
+
             $createdAt = $baseDate->copy()->addDays(rand(0, 14))->addHours(rand(6, 18));
             $scheduledAt = $createdAt->copy()->addDays(rand(0, 3));
-            
+
             $assignedPetugas = null;
             $assignedArmada = null;
-            
+
             if (in_array($status, ['assigned', 'processing', 'done'])) {
                 $petugasIndex = array_rand($petugas);
                 $assignedPetugas = $petugas[$petugasIndex];
@@ -153,12 +155,12 @@ class AdminController extends Controller
 
             $orders[] = [
                 'id' => $i,
-                'order_number' => 'ORD-' . str_pad($i, 5, '0', STR_PAD_LEFT),
+                'order_number' => 'ORD-'.str_pad($i, 5, '0', STR_PAD_LEFT),
                 'customer_name' => $customerNames[$customerType][array_rand($customerNames[$customerType])],
                 'customer_type' => $customerType,
                 'customer_address' => $addresses[array_rand($addresses)],
-                'customer_phone' => '08' . rand(1000000000, 9999999999),
-                'customer_npwp' => $customerType === 'institution' ? rand(10, 99) . '.' . rand(100, 999) . '.' . rand(100, 999) . '.' . rand(1, 9) . '-' . rand(100, 999) . '.' . rand(100, 999) : null,
+                'customer_phone' => '08'.rand(1000000000, 9999999999),
+                'customer_npwp' => $customerType === 'institution' ? rand(10, 99).'.'.rand(100, 999).'.'.rand(100, 999).'.'.rand(1, 9).'-'.rand(100, 999).'.'.rand(100, 999) : null,
                 'volume' => $volume,
                 'status' => $status,
                 'payment_method' => $paymentMethod,
@@ -167,7 +169,7 @@ class AdminController extends Controller
                 'total_amount' => $volume * $pricePerM3,
                 'bukti_transfer' => $buktiTransfer,
                 'setoran_id' => $setoranId,
-                'notes' => rand(0, 1) ? 'Catatan untuk order #' . $i : null,
+                'notes' => rand(0, 1) ? 'Catatan untuk order #'.$i : null,
                 'latitude' => -6.2 + (rand(-100, 100) / 1000),
                 'longitude' => 106.8 + (rand(-100, 100) / 1000),
                 'scheduled_at' => $scheduledAt->format('Y-m-d H:i:s'),
@@ -182,8 +184,8 @@ class AdminController extends Controller
         }
 
         // Sort by created_at descending
-        usort($orders, fn($a, $b) => strtotime($b['created_at']) - strtotime($a['created_at']));
-        
+        usort($orders, fn ($a, $b) => strtotime($b['created_at']) - strtotime($a['created_at']));
+
         return $orders;
     }
 
@@ -192,14 +194,14 @@ class AdminController extends Controller
         $total = array_sum($weights);
         $rand = rand(1, $total);
         $current = 0;
-        
+
         foreach ($weights as $key => $weight) {
             $current += $weight;
             if ($rand <= $current) {
                 return $key;
             }
         }
-        
+
         return array_key_first($weights);
     }
 
@@ -207,7 +209,7 @@ class AdminController extends Controller
     {
         $days = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
         $data = [];
-        
+
         foreach ($days as $day) {
             $orders = rand(2, 8);
             $data[] = [
@@ -216,7 +218,7 @@ class AdminController extends Controller
                 'revenue' => $orders * rand(150000, 400000),
             ];
         }
-        
+
         return $data;
     }
 
@@ -224,13 +226,13 @@ class AdminController extends Controller
     {
         $orders = $this->getMockOrders();
         $today = now()->format('Y-m-d');
-        
-        $todayOrders = array_filter($orders, fn($o) => str_starts_with($o['created_at'], $today));
-        $pendingOrders = array_filter($orders, fn($o) => $o['status'] === 'pending');
-        $todayRevenue = array_sum(array_map(fn($o) => $o['payment_status'] === 'paid' ? $o['total_amount'] : 0, $todayOrders));
-        
+
+        $todayOrders = array_filter($orders, fn ($o) => str_starts_with($o['created_at'], $today));
+        $pendingOrders = array_filter($orders, fn ($o) => $o['status'] === 'pending');
+        $todayRevenue = array_sum(array_map(fn ($o) => $o['payment_status'] === 'paid' ? $o['total_amount'] : 0, $todayOrders));
+
         $petugas = $this->getMockPetugas();
-        $pendingSetoran = array_sum(array_map(fn($p) => $p['saldo_hutang'], $petugas));
+        $pendingSetoran = array_sum(array_map(fn ($p) => $p['saldo_hutang'], $petugas));
 
         return Inertia::render('Admin/Dashboard', [
             'stats' => [
@@ -248,25 +250,25 @@ class AdminController extends Controller
     {
         $orders = $this->getMockOrders();
         $petugas = $this->getMockPetugas();
-        
+
         // Filter by status
         if ($request->has('status') && $request->status !== 'all') {
-            $orders = array_filter($orders, fn($o) => $o['status'] === $request->status);
+            $orders = array_filter($orders, fn ($o) => $o['status'] === $request->status);
         }
-        
+
         // Filter by customer type
         if ($request->has('customer_type') && $request->customer_type !== 'all') {
-            $orders = array_filter($orders, fn($o) => $o['customer_type'] === $request->customer_type);
+            $orders = array_filter($orders, fn ($o) => $o['customer_type'] === $request->customer_type);
         }
-        
+
         // Filter by date
         if ($request->has('date') && $request->date) {
-            $orders = array_filter($orders, fn($o) => str_starts_with($o['scheduled_at'], $request->date));
+            $orders = array_filter($orders, fn ($o) => str_starts_with($o['scheduled_at'], $request->date));
         }
-        
+
         // Re-index array
         $orders = array_values($orders);
-        
+
         // Pagination
         $page = $request->get('page', 1);
         $perPage = 10;
@@ -275,7 +277,7 @@ class AdminController extends Controller
         $paginatedOrders = array_slice($orders, $offset, $perPage);
 
         // Filter petugas yang aktif dan punya armada
-        $availablePetugas = array_values(array_filter($petugas, fn($p) => $p['status_aktif'] && $p['armada']));
+        $availablePetugas = array_values(array_filter($petugas, fn ($p) => $p['status_aktif'] && $p['armada']));
 
         return Inertia::render('Admin/Dispatch', [
             'orders' => [
@@ -300,27 +302,25 @@ class AdminController extends Controller
     {
         $orders = $this->getMockOrders();
         $petugas = $this->getMockPetugas();
-        
+
         // Transfer orders pending verification
-        $transferOrders = array_values(array_filter($orders, fn($o) => 
-            $o['payment_method'] === 'transfer' && 
-            $o['payment_status'] === 'pending_verification' && 
+        $transferOrders = array_values(array_filter($orders, fn ($o) => $o['payment_method'] === 'transfer' &&
+            $o['payment_status'] === 'pending_verification' &&
             $o['bukti_transfer']
         ));
-        
+
         // Cash orders that have been collected but not deposited
         // These are orders where petugas has the cash
-        $cashPendingDeposit = array_values(array_filter($orders, fn($o) => 
-            $o['payment_method'] === 'cash' && 
+        $cashPendingDeposit = array_values(array_filter($orders, fn ($o) => $o['payment_method'] === 'cash' &&
             $o['cash_collection_status'] === 'collected'
         ));
-        
+
         // Group cash pending by petugas for easier setoran
         $cashByPetugas = [];
         foreach ($cashPendingDeposit as $order) {
             if ($order['petugas']) {
                 $petugasId = $order['petugas']['id'];
-                if (!isset($cashByPetugas[$petugasId])) {
+                if (! isset($cashByPetugas[$petugasId])) {
                     $cashByPetugas[$petugasId] = [
                         'petugas' => $order['petugas'],
                         'orders' => [],
@@ -332,44 +332,44 @@ class AdminController extends Controller
             }
         }
         $cashByPetugas = array_values($cashByPetugas);
-        
+
         // Mock setoran history with linked orders
         $setoranHistory = [
             [
-                'id' => 1, 
-                'petugas_id' => 2, 
-                'petugas' => $petugas[1], 
-                'jumlah' => 250000, 
-                'tanggal' => '2026-02-15', 
+                'id' => 1,
+                'petugas_id' => 2,
+                'petugas' => $petugas[1],
+                'jumlah' => 250000,
+                'tanggal' => '2026-02-15',
                 'keterangan' => 'Setoran 2 order tunai',
                 'order_count' => 2,
-                'created_at' => '2026-02-15 16:00:00'
+                'created_at' => '2026-02-15 16:00:00',
             ],
             [
-                'id' => 2, 
-                'petugas_id' => 3, 
-                'petugas' => $petugas[2], 
-                'jumlah' => 150000, 
-                'tanggal' => '2026-02-14', 
+                'id' => 2,
+                'petugas_id' => 3,
+                'petugas' => $petugas[2],
+                'jumlah' => 150000,
+                'tanggal' => '2026-02-14',
                 'keterangan' => 'Setoran 1 order tunai',
                 'order_count' => 1,
-                'created_at' => '2026-02-14 11:00:00'
+                'created_at' => '2026-02-14 11:00:00',
             ],
             [
-                'id' => 3, 
-                'petugas_id' => 5, 
-                'petugas' => $petugas[4], 
-                'jumlah' => 300000, 
-                'tanggal' => '2026-02-13', 
+                'id' => 3,
+                'petugas_id' => 5,
+                'petugas' => $petugas[4],
+                'jumlah' => 300000,
+                'tanggal' => '2026-02-13',
                 'keterangan' => 'Setoran 3 order tunai',
                 'order_count' => 3,
-                'created_at' => '2026-02-13 14:30:00'
+                'created_at' => '2026-02-13 14:30:00',
             ],
         ];
 
         // Calculate totals
-        $totalPendingTransfer = array_sum(array_map(fn($o) => $o['total_amount'], $transferOrders));
-        $totalPendingCash = array_sum(array_map(fn($o) => $o['total_amount'], $cashPendingDeposit));
+        $totalPendingTransfer = array_sum(array_map(fn ($o) => $o['total_amount'], $transferOrders));
+        $totalPendingCash = array_sum(array_map(fn ($o) => $o['total_amount'], $cashPendingDeposit));
 
         return Inertia::render('Admin/Kasir', [
             'transferOrders' => $transferOrders,
@@ -388,31 +388,31 @@ class AdminController extends Controller
     {
         $orders = $this->getMockOrders();
         $mitra = $this->getMockMitra();
-        
+
         // Filter by date range
         $startDate = $request->get('start_date', now()->startOfMonth()->format('Y-m-d'));
         $endDate = $request->get('end_date', now()->format('Y-m-d'));
-        
-        $filteredOrders = array_filter($orders, function($o) use ($startDate, $endDate) {
+
+        $filteredOrders = array_filter($orders, function ($o) use ($startDate, $endDate) {
             $orderDate = substr($o['created_at'], 0, 10);
+
             return $orderDate >= $startDate && $orderDate <= $endDate && $o['status'] === 'done';
         });
-        
+
         $totalOrders = count($filteredOrders);
-        $totalRevenue = array_sum(array_map(fn($o) => $o['total_amount'], $filteredOrders));
-        $totalVolume = array_sum(array_map(fn($o) => $o['volume'], $filteredOrders));
-        
+        $totalRevenue = array_sum(array_map(fn ($o) => $o['total_amount'], $filteredOrders));
+        $totalVolume = array_sum(array_map(fn ($o) => $o['volume'], $filteredOrders));
+
         // Breakdown per mitra
         $mitraBreakdown = [];
         foreach ($mitra as $m) {
-            $mitraOrders = array_filter($filteredOrders, fn($o) => 
-                $o['petugas'] && $o['petugas']['mitra_id'] === $m['id']
+            $mitraOrders = array_filter($filteredOrders, fn ($o) => $o['petugas'] && $o['petugas']['mitra_id'] === $m['id']
             );
             $mitraBreakdown[] = [
                 'mitra' => $m,
                 'total_orders' => count($mitraOrders),
-                'total_revenue' => array_sum(array_map(fn($o) => $o['total_amount'], $mitraOrders)),
-                'total_volume' => array_sum(array_map(fn($o) => $o['volume'], $mitraOrders)),
+                'total_revenue' => array_sum(array_map(fn ($o) => $o['total_amount'], $mitraOrders)),
+                'total_volume' => array_sum(array_map(fn ($o) => $o['volume'], $mitraOrders)),
             ];
         }
 
