@@ -110,7 +110,7 @@ export default function Dashboard({
                 {/* Quick Actions */}
                 <div className="flex gap-3">
                     <Button asChild className="flex-1">
-                        <Link href="/order">Pesan Lagi</Link>
+                        <Link href="/customer/order">Pesan Lagi</Link>
                     </Button>
                     <Button
                         asChild
@@ -188,7 +188,7 @@ export default function Dashboard({
                                 sekarang
                             </p>
                             <Button asChild>
-                                <Link href="/order">
+                                <Link href="/customer/order">
                                     Pesan Sekarang
                                 </Link>
                             </Button>
