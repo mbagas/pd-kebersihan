@@ -2,6 +2,7 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { registerSW } from 'virtual:pwa-register';
 import '../css/app.css';
 import { initializeTheme } from './hooks/use-appearance';
 
@@ -30,3 +31,21 @@ createInertiaApp({
 
 // This will set light / dark mode on load...
 initializeTheme();
+
+// Register PWA service worker with auto-update
+registerSW({
+    onRegistered(registration) {
+        if (registration) {
+            // Check for updates every hour
+            setInterval(
+                () => {
+                    registration.update();
+                },
+                60 * 60 * 1000,
+            );
+        }
+    },
+    onRegisterError(error) {
+        console.error('SW registration failed:', error);
+    },
+});
