@@ -212,7 +212,6 @@ export default function AddressForm({ address }: Props) {
                                         : undefined
                                 }
                                 onChange={handleMapChange}
-                                className="h-[250px]"
                             />
                             {(errors.lat || errors.lng) && (
                                 <p className="text-xs text-destructive">
