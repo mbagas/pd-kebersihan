@@ -166,13 +166,13 @@ export default function AddressForm({ address }: Props) {
                 </Card>
 
                 {/* Address + Map */}
-                <Card>
+                <Card className="overflow-hidden">
                     <CardHeader className="pb-3">
                         <CardTitle className="text-sm">
                             Lokasi
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-3">
+                    <CardContent className="space-y-3 overflow-hidden">
                         <div className="space-y-2">
                             <Label htmlFor="address">
                                 Alamat Lengkap

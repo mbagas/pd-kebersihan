@@ -273,10 +273,10 @@ export function MapPicker({
     };
 
     return (
-        <div className={cn('space-y-3', className)}>
+        <div className={cn('min-w-0 space-y-3', className)}>
             {/* Search bar */}
             <div className="flex gap-2">
-                <div className="relative flex-1">
+                <div className="relative min-w-0 flex-1">
                     <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                         type="text"
@@ -290,15 +290,24 @@ export function MapPicker({
                 <Button
                     type="button"
                     variant="outline"
+                    size="icon"
+                    className="shrink-0"
                     onClick={handleSearch}
                     disabled={isSearching}
+                    title="Cari alamat"
                 >
-                    {isSearching ? 'Mencari...' : 'Cari'}
+                    <Search
+                        className={cn(
+                            'h-4 w-4',
+                            isSearching && 'animate-pulse',
+                        )}
+                    />
                 </Button>
                 <Button
                     type="button"
                     variant="outline"
                     size="icon"
+                    className="shrink-0"
                     onClick={handleGetLocation}
                     disabled={isLocating}
                     title="Gunakan lokasi saat ini"
