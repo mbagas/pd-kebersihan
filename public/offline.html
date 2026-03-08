@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - SIM-PALD</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system,
+                BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+                Arial, 'Noto Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+            color: #1f2937;
+            padding: 1.5rem;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 28rem;
+            width: 100%;
+        }
+
+        .icon {
+            margin: 0 auto 1.5rem;
+            width: 5rem;
+            height: 5rem;
+            color: #2563eb;
+        }
+
+        .app-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #2563eb;
+            margin-bottom: 0.75rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #111827;
+        }
+
+        p {
+            font-size: 1rem;
+            color: #6b7280;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.625rem 1.5rem;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: #ffffff;
+            background-color: #2563eb;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+
+        .btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1a1a2e;
+                color: #e5e7eb;
+            }
+
+            h1 {
+                color: #f9fafb;
+            }
+
+            p {
+                color: #9ca3af;
+            }
+
+            .icon {
+                color: #60a5fa;
+            }
+
+            .app-name {
+                color: #60a5fa;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <svg
+            class="icon"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+        >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 9.75v3.75m0 3h.008v.008H12V16.5zm-6.364-1.136A7.5 7.5 0 0 1 12 4.5a7.5 7.5 0 0 1 6.364 3.364M3.515 12.515a10.48 10.48 0 0 1 2.121-2.121m4.243-2.122a5.25 5.25 0 0 1 4.243 0m4.242 2.122a10.48 10.48 0 0 1 2.121 2.121"
+            />
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M3 3l18 18"
+            />
+        </svg>
+        <div class="app-name">SIM-PALD</div>
+        <h1>Anda sedang offline</h1>
+        <p>Periksa koneksi internet Anda dan coba lagi</p>
+        <button class="btn" onclick="location.reload()">Coba lagi</button>
+    </div>
+</body>
+</html>

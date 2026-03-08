@@ -9,6 +9,7 @@ import {
     WifiOff,
 } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
+import { InstallBanner } from '@/components/shared/InstallBanner';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useOnlineStatus } from '@/hooks/use-online-status';
 import { cn } from '@/lib/utils';
@@ -45,11 +46,7 @@ function useIsActive(href: string, exact?: boolean): boolean {
     return currentUrl === href || currentUrl.startsWith(href + '/');
 }
 
-function NavItem({
-    item,
-}: {
-    item: (typeof navItems)[number];
-}) {
+function NavItem({ item }: { item: (typeof navItems)[number] }) {
     const isActive = useIsActive(item.href, item.exact);
     const Icon = item.icon;
 
@@ -58,22 +55,16 @@ function NavItem({
             href={item.href}
             className={cn(
                 'flex min-h-[44px] min-w-[44px] flex-col items-center justify-center gap-1 px-3 py-2 transition-colors',
-                isActive
-                    ? 'text-primary'
-                    : 'text-muted-foreground',
+                isActive ? 'text-primary' : 'text-muted-foreground',
             )}
         >
             <Icon className="h-5 w-5" />
-            <span className="text-[10px] font-medium">
-                {item.label}
-            </span>
+            <span className="text-[10px] font-medium">{item.label}</span>
         </Link>
     );
 }
 
-export default function CustomerLayout({
-    children,
-}: PropsWithChildren) {
+export default function CustomerLayout({ children }: PropsWithChildren) {
     const { auth } = usePage().props;
     const isOnline = useOnlineStatus();
 
@@ -87,10 +78,7 @@ export default function CustomerLayout({
                 }}
             >
                 <div className="flex h-14 items-center justify-between px-4">
-                    <Link
-                        href="/customer"
-                        className="font-semibold"
-                    >
+                    <Link href="/customer" className="font-semibold">
                         SIM-PALD
                     </Link>
                     <div className="flex items-center gap-3">
@@ -122,6 +110,9 @@ export default function CustomerLayout({
                 </div>
             </header>
 
+            {/* PWA Install Banner */}
+            <InstallBanner />
+
             {/* Main Content */}
             <main>{children}</main>
 
@@ -129,8 +120,7 @@ export default function CustomerLayout({
             <nav
                 className="fixed right-0 bottom-0 left-0 z-50 border-t bg-background"
                 style={{
-                    paddingBottom:
-                        'env(safe-area-inset-bottom, 0px)',
+                    paddingBottom: 'env(safe-area-inset-bottom, 0px)',
                 }}
             >
                 <div className="flex h-16 items-center justify-around">
@@ -144,9 +134,7 @@ export default function CustomerLayout({
                         className="flex min-h-[44px] min-w-[44px] flex-col items-center justify-center gap-1 px-3 py-2 text-muted-foreground transition-colors hover:text-destructive"
                     >
                         <LogOut className="h-5 w-5" />
-                        <span className="text-[10px] font-medium">
-                            Keluar
-                        </span>
+                        <span className="text-[10px] font-medium">Keluar</span>
                     </Link>
                 </div>
             </nav>

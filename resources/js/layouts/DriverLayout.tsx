@@ -8,6 +8,7 @@ import {
     WifiOff,
 } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
+import { InstallBanner } from '@/components/shared/InstallBanner';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useOnlineStatus } from '@/hooks/use-online-status';
 import { cn } from '@/lib/utils';
@@ -60,6 +61,9 @@ export default function DriverLayout({ children }: PropsWithChildren) {
                     </div>
                 </div>
             </header>
+
+            {/* PWA Install Banner */}
+            <InstallBanner />
 
             {/* Main Content - uses native scroll */}
             <main>{children}</main>
