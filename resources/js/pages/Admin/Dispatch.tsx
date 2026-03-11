@@ -67,6 +67,8 @@ interface Props {
 const STATUS_COLORS: Record<string, string> = {
     pending: 'bg-yellow-100 text-yellow-800',
     assigned: 'bg-blue-100 text-blue-800',
+    on_the_way: 'bg-violet-100 text-violet-800',
+    arrived: 'bg-indigo-100 text-indigo-800',
     processing: 'bg-purple-100 text-purple-800',
     done: 'bg-green-100 text-green-800',
     cancelled: 'bg-red-100 text-red-800',
@@ -75,6 +77,8 @@ const STATUS_COLORS: Record<string, string> = {
 const STATUS_LABELS: Record<string, string> = {
     pending: 'Pending',
     assigned: 'Ditugaskan',
+    on_the_way: 'Dalam Perjalanan',
+    arrived: 'Tiba di Lokasi',
     processing: 'Diproses',
     done: 'Selesai',
     cancelled: 'Dibatalkan',
@@ -320,9 +324,9 @@ export default function Dispatch({ orders, petugas, filters }: Props) {
             ),
         },
         {
-            key: 'volume',
+            key: 'volume_estimate',
             header: 'Volume',
-            render: (order) => <span>{order.volume} m³</span>,
+            render: (order) => <span>{order.volume_estimate} m³</span>,
         },
         {
             key: 'scheduled_at',
@@ -532,7 +536,7 @@ export default function Dispatch({ orders, petugas, filters }: Props) {
                                     {selectedOrder.customer_address}
                                 </p>
                                 <p className="mt-2 text-sm">
-                                    Volume: {selectedOrder.volume} m³ •{' '}
+                                    Volume: {selectedOrder.volume_estimate} m³ •{' '}
                                     {formatCurrency(selectedOrder.total_amount)}
                                 </p>
                             </div>
@@ -749,7 +753,7 @@ export default function Dispatch({ orders, petugas, filters }: Props) {
                                             Volume
                                         </p>
                                         <p className="text-lg font-semibold">
-                                            {selectedOrder.volume} m³
+                                            {selectedOrder.volume_actual ?? selectedOrder.volume_estimate} m³
                                         </p>
                                     </div>
                                     <div className="rounded-lg bg-muted p-3">

@@ -133,18 +133,18 @@ function OrderRow({ order }: { order: AuditOrder }) {
                     </div>
                 </TableCell>
                 <TableCell>
-                    {order.petugas_nama ? (
+                    {order.petugas ? (
                         <div>
-                            <p className="font-medium">{order.petugas_nama}</p>
+                            <p className="font-medium">{order.petugas.nama}</p>
                             <p className="text-xs text-muted-foreground">
-                                {order.mitra_nama}
+                                {order.petugas.mitra?.nama}
                             </p>
                         </div>
                     ) : (
                         <span className="text-muted-foreground">-</span>
                     )}
                 </TableCell>
-                <TableCell className="text-right">{order.volume} m³</TableCell>
+                <TableCell className="text-right">{order.volume_actual ?? order.volume_estimate} m³</TableCell>
                 <TableCell className="text-right font-medium text-green-600">
                     {formatCurrency(order.total_amount)}
                 </TableCell>
@@ -168,7 +168,7 @@ function OrderRow({ order }: { order: AuditOrder }) {
                                         <div className="space-y-1">
                                             <p className="text-xs text-muted-foreground">Before</p>
                                             <div className="flex aspect-video items-center justify-center rounded-lg bg-muted">
-                                                {order.foto_before ? (
+                                                {order.evidence?.before && order.evidence.before.length > 0 ? (
                                                     <Image className="h-8 w-8 text-muted-foreground" />
                                                 ) : (
                                                     <span className="text-xs text-muted-foreground">Tidak ada</span>
@@ -178,7 +178,7 @@ function OrderRow({ order }: { order: AuditOrder }) {
                                         <div className="space-y-1">
                                             <p className="text-xs text-muted-foreground">After</p>
                                             <div className="flex aspect-video items-center justify-center rounded-lg bg-muted">
-                                                {order.foto_after ? (
+                                                {order.evidence?.after && order.evidence.after.length > 0 ? (
                                                     <Image className="h-8 w-8 text-muted-foreground" />
                                                 ) : (
                                                     <span className="text-xs text-muted-foreground">Tidak ada</span>
@@ -194,19 +194,19 @@ function OrderRow({ order }: { order: AuditOrder }) {
                                     </h4>
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2 text-sm">
-                                            <div className={`h-2 w-2 rounded-full ${order.timeline.assigned_at ? 'bg-blue-500' : 'bg-gray-300'}`} />
+                                            <div className={`h-2 w-2 rounded-full ${order.assigned_at ? 'bg-blue-500' : 'bg-gray-300'}`} />
                                             <span className="text-muted-foreground">Ditugaskan:</span>
-                                            <span>{order.timeline.assigned_at ? formatDateTime(order.timeline.assigned_at) : '-'}</span>
+                                            <span>{order.assigned_at ? formatDateTime(order.assigned_at) : '-'}</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm">
-                                            <div className={`h-2 w-2 rounded-full ${order.timeline.arrived_at ? 'bg-purple-500' : 'bg-gray-300'}`} />
+                                            <div className={`h-2 w-2 rounded-full ${order.arrived_at ? 'bg-purple-500' : 'bg-gray-300'}`} />
                                             <span className="text-muted-foreground">Tiba:</span>
-                                            <span>{order.timeline.arrived_at ? formatDateTime(order.timeline.arrived_at) : '-'}</span>
+                                            <span>{order.arrived_at ? formatDateTime(order.arrived_at) : '-'}</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm">
-                                            <div className={`h-2 w-2 rounded-full ${order.timeline.completed_at ? 'bg-green-500' : 'bg-gray-300'}`} />
+                                            <div className={`h-2 w-2 rounded-full ${order.completed_at ? 'bg-green-500' : 'bg-gray-300'}`} />
                                             <span className="text-muted-foreground">Selesai:</span>
-                                            <span>{order.timeline.completed_at ? formatDateTime(order.timeline.completed_at) : '-'}</span>
+                                            <span>{order.completed_at ? formatDateTime(order.completed_at) : '-'}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -217,7 +217,7 @@ function OrderRow({ order }: { order: AuditOrder }) {
                                     </h4>
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2">
-                                            {order.gps_validated ? (
+                                            {order.gps_arrival?.validated ? (
                                                 <Badge className="bg-green-100 text-green-800">
                                                     <CheckCircle2 className="mr-1 h-3 w-3" />
                                                     Tervalidasi
@@ -235,13 +235,13 @@ function OrderRow({ order }: { order: AuditOrder }) {
                                             </p>
                                         )}
                                     </div>
-                                    {order.armada_plat && (
+                                    {order.armada && (
                                         <div className="mt-4">
                                             <h4 className="flex items-center gap-2 text-sm font-semibold">
                                                 <Truck className="h-4 w-4" />
                                                 Armada
                                             </h4>
-                                            <p className="mt-1 text-sm">{order.armada_plat}</p>
+                                            <p className="mt-1 text-sm">{order.armada.plat_nomor} ({order.armada.kapasitas} m³)</p>
                                         </div>
                                     )}
                                     {order.notes && (
@@ -335,17 +335,17 @@ export default function Trail({ orders, filters }: Props) {
                 CUSTOMER_TYPE_LABELS[o.customer_type],
                 o.customer_address,
                 o.customer_phone,
-                o.petugas_nama || '-',
-                o.mitra_nama || '-',
-                o.armada_plat || '-',
-                o.volume,
+                o.petugas?.nama || '-',
+                o.petugas?.mitra?.nama || '-',
+                o.armada?.plat_nomor || '-',
+                o.volume_actual ?? o.volume_estimate,
                 o.total_amount,
                 STATUS_LABELS[o.status],
                 o.payment_method === 'cash' ? 'Tunai' : 'Transfer',
-                o.gps_validated ? 'Ya' : 'Tidak',
-                o.timeline.assigned_at ? formatDateTime(o.timeline.assigned_at) : '-',
-                o.timeline.arrived_at ? formatDateTime(o.timeline.arrived_at) : '-',
-                o.timeline.completed_at ? formatDateTime(o.timeline.completed_at) : '-',
+                o.gps_arrival?.validated ? 'Ya' : 'Tidak',
+                o.assigned_at ? formatDateTime(o.assigned_at) : '-',
+                o.arrived_at ? formatDateTime(o.arrived_at) : '-',
+                o.completed_at ? formatDateTime(o.completed_at) : '-',
             ]),
         ];
         const sheet = XLSX.utils.aoa_to_sheet(data);

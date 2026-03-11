@@ -3,38 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\MockData;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ArmadaController extends Controller
 {
-    private function getMockMitra(): array
-    {
-        return [
-            ['id' => 1, 'nama' => 'UPT Kebersihan Pusat', 'tipe' => 'internal'],
-            ['id' => 2, 'nama' => 'CV. Bersih Jaya', 'tipe' => 'external'],
-            ['id' => 3, 'nama' => 'CV. Maju Bersama', 'tipe' => 'external'],
-        ];
-    }
-
-    private function getMockArmada(): array
-    {
-        $mitra = $this->getMockMitra();
-
-        return [
-            ['id' => 1, 'plat_nomor' => 'B 1234 ABC', 'kapasitas' => 6, 'status' => 'available', 'mitra_id' => 1, 'mitra' => $mitra[0], 'created_at' => '2026-01-01 08:00:00', 'updated_at' => '2026-01-01 08:00:00'],
-            ['id' => 2, 'plat_nomor' => 'B 5678 DEF', 'kapasitas' => 8, 'status' => 'in_use', 'mitra_id' => 1, 'mitra' => $mitra[0], 'created_at' => '2026-01-02 08:00:00', 'updated_at' => '2026-02-16 09:00:00'],
-            ['id' => 3, 'plat_nomor' => 'B 9012 GHI', 'kapasitas' => 6, 'status' => 'available', 'mitra_id' => 2, 'mitra' => $mitra[1], 'created_at' => '2026-01-05 09:00:00', 'updated_at' => '2026-01-05 09:00:00'],
-            ['id' => 4, 'plat_nomor' => 'B 3456 JKL', 'kapasitas' => 10, 'status' => 'maintenance', 'mitra_id' => 2, 'mitra' => $mitra[1], 'created_at' => '2026-01-06 09:00:00', 'updated_at' => '2026-02-10 14:00:00'],
-            ['id' => 5, 'plat_nomor' => 'B 7890 MNO', 'kapasitas' => 8, 'status' => 'available', 'mitra_id' => 3, 'mitra' => $mitra[2], 'created_at' => '2026-01-10 10:00:00', 'updated_at' => '2026-01-10 10:00:00'],
-        ];
-    }
-
     public function index(Request $request): Response
     {
-        $armada = $this->getMockArmada();
-        $mitra = $this->getMockMitra();
+        $armada = MockData::armada();
+        $mitra = MockData::mitra();
 
         // Search
         if ($request->has('search') && $request->search) {

@@ -142,9 +142,9 @@ export default function Laporan({
             render: (order) => order.customer_name,
         },
         {
-            key: 'volume',
+            key: 'volume_estimate',
             header: 'Volume',
-            render: (order) => `${order.volume} m³`,
+            render: (order) => `${order.volume_actual ?? order.volume_estimate} m³`,
         },
         {
             key: 'total_amount',

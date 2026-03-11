@@ -129,7 +129,7 @@ export default function OrderShow({ order }: Props) {
 
     return (
         <CustomerLayout>
-            <Head title={`Pesanan ${order.ticket_number}`} />
+            <Head title={`Pesanan ${order.order_number}`} />
 
             <div className="space-y-4 p-4">
                 {/* Back button */}
@@ -153,7 +153,7 @@ export default function OrderShow({ order }: Props) {
                 <div className="flex items-start justify-between">
                     <div>
                         <h1 className="text-lg font-bold">
-                            {order.ticket_number}
+                            {order.order_number}
                         </h1>
                         <p className="text-sm text-muted-foreground">
                             {formatDate(order.created_at)}
@@ -265,7 +265,7 @@ export default function OrderShow({ order }: Props) {
                 </Card>
 
                 {/* Officer Info */}
-                {order.officer && (
+                {order.petugas && (
                     <Card>
                         <CardHeader className="pb-3">
                             <CardTitle className="text-sm">Petugas</CardTitle>
@@ -277,10 +277,10 @@ export default function OrderShow({ order }: Props) {
                                 </div>
                                 <div>
                                     <p className="text-sm font-medium">
-                                        {order.officer.name}
+                                        {order.petugas.nama}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
-                                        {order.officer.phone}
+                                        {order.petugas.kontak}
                                     </p>
                                 </div>
                             </div>
@@ -353,7 +353,7 @@ export default function OrderShow({ order }: Props) {
                                 Metode
                             </span>
                             <div className="flex items-center gap-1.5 font-medium">
-                                {order.payment_method === 'cod' ? (
+                                {order.payment_method === 'cash' ? (
                                     <>
                                         <Banknote className="h-4 w-4" />
                                         Bayar di Tempat (COD)
@@ -399,18 +399,18 @@ export default function OrderShow({ order }: Props) {
                                         order.volume_estimate}{' '}
                                     m³
                                 </span>
-                                <span>{formatCurrency(order.total_price)}</span>
+                                <span>{formatCurrency(order.total_amount)}</span>
                             </div>
                         )}
                         <div className="flex items-center justify-between">
                             <span className="font-medium">Total</span>
                             <span className="text-lg font-bold text-primary">
-                                {formatCurrency(order.total_price)}
+                                {formatCurrency(order.total_amount)}
                             </span>
                         </div>
 
                         {/* COD Instructions */}
-                        {order.payment_method === 'cod' && (
+                        {order.payment_method === 'cash' && (
                             <div className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
                                 <p className="font-medium">Pembayaran Tunai</p>
                                 <p className="mt-1 text-xs">
@@ -453,7 +453,7 @@ export default function OrderShow({ order }: Props) {
                                     <p className="mt-2 text-xs text-blue-600">
                                         Transfer senilai{' '}
                                         <strong>
-                                            {formatCurrency(order.total_price)}
+                                            {formatCurrency(order.total_amount)}
                                         </strong>{' '}
                                         lalu upload bukti transfer di bawah.
                                     </p>

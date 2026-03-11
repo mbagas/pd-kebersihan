@@ -57,13 +57,17 @@ export interface DriverTask {
     payment_method: PaymentMethod;
     total_amount: number;
     // Evidence
-    foto_sebelum?: string[];
-    foto_sesudah?: string[];
+    evidence?: {
+        before?: string[];
+        after?: string[];
+    };
     // GPS validation
-    gps_arrival_lat?: number;
-    gps_arrival_lng?: number;
-    gps_valid?: boolean;
-    gps_invalid_reason?: string;
+    gps_arrival?: {
+        lat?: number;
+        lng?: number;
+        validated?: boolean;
+        invalid_reason?: string;
+    };
     // Timestamps
     scheduled_at?: string;
     started_at?: string;          // Mulai perjalanan

@@ -161,7 +161,7 @@ function OrderMap({ orders }: { orders: MapOrder[] }) {
                             ${order.customer_address}
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 12px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
-                            <span>Volume: <strong>${order.volume} m³</strong></span>
+                            <span>Volume: <strong>${order.volume_actual ?? order.volume_estimate} m³</strong></span>
                             <span style="color: #059669; font-weight: 600;">
                                 ${formatCurrency(order.total_amount)}
                             </span>

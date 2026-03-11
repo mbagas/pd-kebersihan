@@ -43,7 +43,8 @@ export interface MapOrder {
     customer_address: string;
     latitude: number;
     longitude: number;
-    volume: number;
+    volume_estimate: number;
+    volume_actual?: number;
     total_amount: number;
     status: string;
     created_at: string;
@@ -97,12 +98,6 @@ export interface KeuanganData {
 /**
  * Audit Trail Types
  */
-export interface OrderTimeline {
-    assigned_at?: string;
-    arrived_at?: string;
-    completed_at?: string;
-}
-
 export interface AuditOrder {
     id: number;
     order_number: string;
@@ -110,23 +105,46 @@ export interface AuditOrder {
     customer_type: 'household' | 'institution';
     customer_address: string;
     customer_phone: string;
-    volume: number;
+    customer_npwp?: string;
+    volume_estimate: number;
+    volume_actual?: number;
     total_amount: number;
     status: string;
     payment_method: 'cash' | 'transfer';
     payment_status: string;
     latitude?: number;
     longitude?: number;
-    petugas_nama?: string;
-    mitra_nama?: string;
-    armada_plat?: string;
-    foto_before?: string;
-    foto_after?: string;
-    timeline: OrderTimeline;
-    gps_validated: boolean;
+    petugas?: {
+        id: number;
+        nama: string;
+        kontak: string;
+        mitra_id: number;
+        mitra?: {
+            id: number;
+            nama: string;
+            tipe: string;
+        };
+    };
+    armada?: {
+        id: number;
+        plat_nomor: string;
+        kapasitas: number;
+    };
+    evidence?: {
+        before?: string[];
+        after?: string[];
+    };
+    gps_arrival?: {
+        lat?: number;
+        lng?: number;
+        validated?: boolean;
+    };
     notes?: string;
     created_at: string;
     scheduled_at?: string;
+    assigned_at?: string;
+    started_at?: string;
+    arrived_at?: string;
     completed_at?: string;
 }
 

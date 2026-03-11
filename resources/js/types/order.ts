@@ -102,6 +102,6 @@ export interface OrderFormPrefill {
     phone?: string;
     address?: string;
     estimated_volume?: number;
-    payment_method?: 'cod' | 'transfer';
+    payment_method?: 'cash' | 'transfer';
     notes?: string;
 }

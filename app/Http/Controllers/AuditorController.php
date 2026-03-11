@@ -2,138 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\MockData;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class AuditorController extends Controller
 {
-    /**
-     * Mock data generators (reuse from AdminController pattern)
-     */
-    private function getMockMitra(): array
-    {
-        return [
-            ['id' => 1, 'nama' => 'UPT Kebersihan Pusat', 'tipe' => 'internal'],
-            ['id' => 2, 'nama' => 'CV. Bersih Jaya', 'tipe' => 'external'],
-            ['id' => 3, 'nama' => 'CV. Maju Bersama', 'tipe' => 'external'],
-        ];
-    }
-
-    private function getMockOrders(): array
-    {
-        $mitra = $this->getMockMitra();
-        $customerTypes = ['household', 'institution'];
-        $paymentMethods = ['cash', 'transfer'];
-        $statuses = ['pending', 'assigned', 'on_the_way', 'arrived', 'processing', 'done', 'cancelled'];
-
-        $customerNames = [
-            'household' => ['Pak Ahmad', 'Bu Siti', 'Pak Joko', 'Bu Dewi', 'Pak Hendra', 'Bu Rina', 'Pak Bambang', 'Bu Yuni', 'Pak Darmawan', 'Bu Lestari'],
-            'institution' => ['PT. Maju Jaya', 'CV. Berkah Abadi', 'RS. Sehat Sentosa', 'Hotel Grand Palace', 'Mall Central', 'Universitas Nusantara', 'Bank Mandiri Cabang Utama', 'Kantor Kecamatan', 'Pabrik Tekstil Indah', 'Restoran Padang Sederhana'],
-        ];
-
-        $addresses = [
-            'Jl. Merdeka No. 10, Kel. Sukamaju',
-            'Jl. Sudirman No. 25, Kel. Cempaka',
-            'Jl. Gatot Subroto No. 45, Kel. Harapan',
-            'Jl. Ahmad Yani No. 88, Kel. Sejahtera',
-            'Jl. Diponegoro No. 12, Kel. Makmur',
-            'Jl. Imam Bonjol No. 33, Kel. Damai',
-            'Jl. Veteran No. 56, Kel. Sentosa',
-            'Jl. Pahlawan No. 78, Kel. Bahagia',
-            'Jl. Kartini No. 99, Kel. Indah',
-            'Jl. Pemuda No. 15, Kel. Jaya',
-        ];
-
-        $petugasNames = ['Budi Santoso', 'Agus Wijaya', 'Dedi Kurniawan', 'Eko Prasetyo', 'Fajar Hidayat'];
-        $armadaPlats = ['B 1234 ABC', 'B 5678 DEF', 'B 9012 GHI', 'B 3456 JKL', 'B 7890 MNO'];
-
-        $orders = [];
-        $baseDate = now()->subMonths(6);
-
-        // Generate 150 orders for 6 months of data
-        for ($i = 1; $i <= 150; $i++) {
-            $customerType = $customerTypes[array_rand($customerTypes)];
-            $status = $this->weightedRandom([
-                'pending' => 5,
-                'assigned' => 5,
-                'on_the_way' => 3,
-                'arrived' => 3,
-                'processing' => 4,
-                'done' => 75,
-                'cancelled' => 5,
-            ]);
-
-            $paymentMethod = $paymentMethods[array_rand($paymentMethods)];
-            $paymentStatus = $status === 'done' ? 'paid' : ($status === 'cancelled' ? 'unpaid' : 'unpaid');
-
-            $volume = $customerType === 'household' ? rand(2, 6) : rand(5, 15);
-            $pricePerM3 = $customerType === 'household' ? 50000 : 75000;
-
-            $createdAt = $baseDate->copy()->addDays(rand(0, 180))->addHours(rand(6, 18));
-            $scheduledAt = $createdAt->copy()->addDays(rand(0, 3));
-
-            $hasPetugas = in_array($status, ['assigned', 'on_the_way', 'arrived', 'processing', 'done']);
-            $petugasIndex = array_rand($petugasNames);
-            $mitraIndex = array_rand($mitra);
-
-            $orders[] = [
-                'id' => $i,
-                'order_number' => 'ORD-'.str_pad($i, 5, '0', STR_PAD_LEFT),
-                'customer_name' => $customerNames[$customerType][array_rand($customerNames[$customerType])],
-                'customer_type' => $customerType,
-                'customer_address' => $addresses[array_rand($addresses)],
-                'customer_phone' => '08'.rand(1000000000, 9999999999),
-                'volume' => $volume,
-                'status' => $status,
-                'payment_method' => $paymentMethod,
-                'payment_status' => $paymentStatus,
-                'total_amount' => $volume * $pricePerM3,
-                'latitude' => -6.2 + (rand(-200, 200) / 1000),
-                'longitude' => 106.8 + (rand(-200, 200) / 1000),
-                'scheduled_at' => $scheduledAt->format('Y-m-d H:i:s'),
-                'completed_at' => $status === 'done' ? $scheduledAt->copy()->addHours(rand(1, 4))->format('Y-m-d H:i:s') : null,
-                'created_at' => $createdAt->format('Y-m-d H:i:s'),
-                'petugas_nama' => $hasPetugas ? $petugasNames[$petugasIndex] : null,
-                'mitra_nama' => $hasPetugas ? $mitra[$mitraIndex]['nama'] : null,
-                'mitra_id' => $hasPetugas ? $mitra[$mitraIndex]['id'] : null,
-                'armada_plat' => $hasPetugas ? $armadaPlats[$petugasIndex] : null,
-                'foto_before' => $status === 'done' ? '/storage/photos/before-'.$i.'.jpg' : null,
-                'foto_after' => $status === 'done' ? '/storage/photos/after-'.$i.'.jpg' : null,
-                'timeline' => [
-                    'assigned_at' => $hasPetugas ? $createdAt->copy()->addMinutes(rand(5, 30))->format('Y-m-d H:i:s') : null,
-                    'arrived_at' => in_array($status, ['arrived', 'processing', 'done']) ? $scheduledAt->copy()->addMinutes(rand(30, 90))->format('Y-m-d H:i:s') : null,
-                    'completed_at' => $status === 'done' ? $scheduledAt->copy()->addHours(rand(1, 4))->format('Y-m-d H:i:s') : null,
-                ],
-                'gps_validated' => $status === 'done' ? (rand(0, 10) > 2) : false,
-                'notes' => rand(0, 3) === 0 ? 'Catatan untuk order #'.$i : null,
-            ];
-        }
-
-        usort($orders, fn ($a, $b) => strtotime($b['created_at']) - strtotime($a['created_at']));
-
-        return $orders;
-    }
-
-    private function weightedRandom(array $weights): string
-    {
-        $total = array_sum($weights);
-        $rand = rand(1, $total);
-        $current = 0;
-
-        foreach ($weights as $key => $weight) {
-            $current += $weight;
-            if ($rand <= $current) {
-                return $key;
-            }
-        }
-
-        return array_key_first($weights);
-    }
-
     public function dashboard(): Response
     {
-        $orders = $this->getMockOrders();
+        $orders = MockData::generateOrders(150, 180);
         $currentMonth = now()->format('Y-m');
 
         // Filter orders bulan ini
@@ -143,12 +21,12 @@ class AuditorController extends Controller
         // Stats
         $totalOrderBulanIni = count($monthOrders);
         $totalPendapatan = array_sum(array_map(fn ($o) => $o['payment_status'] === 'paid' ? $o['total_amount'] : 0, $monthOrders));
-        $totalVolume = array_sum(array_map(fn ($o) => $o['status'] === 'done' ? $o['volume'] : 0, $monthOrders));
+        $totalVolume = array_sum(array_map(fn ($o) => $o['status'] === 'done' ? ($o['volume_actual'] ?? $o['volume_estimate']) : 0, $monthOrders));
         $daysInMonth = now()->daysInMonth;
         $rataRataOrderPerHari = $totalOrderBulanIni > 0 ? round($totalOrderBulanIni / $daysInMonth, 1) : 0;
 
         // Order Distribution (Pusat vs Mitra)
-        $pusatOrders = count(array_filter($doneOrders, fn ($o) => $o['mitra_id'] === 1));
+        $pusatOrders = count(array_filter($doneOrders, fn ($o) => $o['petugas'] && $o['petugas']['mitra_id'] === 1));
         $mitraOrders = count($doneOrders) - $pusatOrders;
 
         // Monthly Revenue (6 bulan terakhir)
@@ -199,7 +77,7 @@ class AuditorController extends Controller
 
     public function peta(Request $request): Response
     {
-        $orders = $this->getMockOrders();
+        $orders = MockData::generateOrders(150, 180);
 
         // Filter by date range
         $startDate = $request->get('start_date', now()->subDays(30)->format('Y-m-d'));
@@ -235,7 +113,8 @@ class AuditorController extends Controller
             'customer_address' => $o['customer_address'],
             'latitude' => $o['latitude'],
             'longitude' => $o['longitude'],
-            'volume' => $o['volume'],
+            'volume_estimate' => $o['volume_estimate'],
+            'volume_actual' => $o['volume_actual'],
             'total_amount' => $o['total_amount'],
             'status' => $o['status'],
             'created_at' => $o['created_at'],
@@ -254,8 +133,8 @@ class AuditorController extends Controller
 
     public function keuangan(Request $request): Response
     {
-        $orders = $this->getMockOrders();
-        $mitra = $this->getMockMitra();
+        $orders = MockData::generateOrders(150, 180);
+        $mitra = MockData::mitra();
 
         // Filter by date range
         $startDate = $request->get('start_date', now()->startOfMonth()->format('Y-m-d'));
@@ -272,19 +151,19 @@ class AuditorController extends Controller
         $summary = [
             'total_pendapatan' => array_sum(array_map(fn ($o) => $o['total_amount'], $filteredOrders)),
             'total_orders' => count($filteredOrders),
-            'total_volume' => array_sum(array_map(fn ($o) => $o['volume'], $filteredOrders)),
+            'total_volume' => array_sum(array_map(fn ($o) => $o['volume_actual'] ?? $o['volume_estimate'], $filteredOrders)),
         ];
 
         // Breakdown per Mitra
         $mitraBreakdown = [];
         foreach ($mitra as $m) {
-            $mitraOrders = array_filter($filteredOrders, fn ($o) => $o['mitra_id'] === $m['id']);
+            $mitraOrders = array_filter($filteredOrders, fn ($o) => $o['petugas'] && $o['petugas']['mitra_id'] === $m['id']);
             $mitraBreakdown[] = [
                 'mitra_id' => $m['id'],
                 'mitra_nama' => $m['nama'],
                 'total_orders' => count($mitraOrders),
                 'total_pendapatan' => array_sum(array_map(fn ($o) => $o['total_amount'], $mitraOrders)),
-                'total_volume' => array_sum(array_map(fn ($o) => $o['volume'], $mitraOrders)),
+                'total_volume' => array_sum(array_map(fn ($o) => $o['volume_actual'] ?? $o['volume_estimate'], $mitraOrders)),
             ];
         }
 
@@ -334,7 +213,7 @@ class AuditorController extends Controller
 
     public function trail(Request $request): Response
     {
-        $orders = $this->getMockOrders();
+        $orders = MockData::generateOrders(150, 180);
 
         // Filter by date range
         $startDate = $request->get('start_date', now()->subDays(30)->format('Y-m-d'));

@@ -3,6 +3,7 @@
  */
 
 import type { CustomerType, OrderStatus, PaymentStatus } from './order';
+import type { PaymentMethod } from './admin';
 
 /**
  * Customer Profile
@@ -41,26 +42,39 @@ export interface CustomerAddress {
  */
 export interface CustomerOrder {
     id: number;
-    ticket_number: string;
+    order_number: string;
     status: OrderStatus;
-    payment_method: 'cod' | 'transfer';
+    payment_method: PaymentMethod;
     payment_status: PaymentStatus;
     customer_name: string;
     customer_type: CustomerType;
     customer_address: string;
     customer_phone: string;
+    customer_npwp?: string;
     volume_estimate?: number;
     volume_actual?: number;
-    total_price: number;
+    total_amount: number;
     notes?: string;
     scheduled_at?: string;
     assigned_at?: string;
     started_at?: string;
     completed_at?: string;
     created_at: string;
-    officer?: {
-        name: string;
-        phone: string;
+    petugas?: {
+        id: number;
+        nama: string;
+        kontak: string;
+        mitra_id: number;
+        mitra?: {
+            id: number;
+            nama: string;
+            tipe: string;
+        };
+    };
+    armada?: {
+        id: number;
+        plat_nomor: string;
+        kapasitas: number;
     };
     evidence?: {
         before?: string[];

@@ -29,13 +29,13 @@ import { cn } from '@/lib/utils';
 // Mock data untuk demo
 const MOCK_ORDERS = [
     {
-        ticket: 'TKT-2026-0001',
+        ticket: 'ORD-2026-0001',
         phone: '081234567890',
         customerName: 'Budi Santoso',
         customerType: 'household',
         address: 'Jl. Raden Intan No. 45, Tanjung Karang',
         status: 'done',
-        paymentMethod: 'cod',
+        paymentMethod: 'cash',
         paymentStatus: 'paid',
         estimatedPrice: 150000,
         finalPrice: 150000,
@@ -49,7 +49,7 @@ const MOCK_ORDERS = [
         },
     },
     {
-        ticket: 'TKT-2026-0002',
+        ticket: 'ORD-2026-0002',
         phone: '081298765432',
         customerName: 'PT. Maju Jaya',
         customerType: 'institution',
@@ -69,7 +69,7 @@ const MOCK_ORDERS = [
         },
     },
     {
-        ticket: 'TKT-2026-0003',
+        ticket: 'ORD-2026-0003',
         phone: '081345678901',
         customerName: 'Siti Aminah',
         customerType: 'household',
@@ -89,13 +89,13 @@ const MOCK_ORDERS = [
         },
     },
     {
-        ticket: 'TKT-2026-0004',
+        ticket: 'ORD-2026-0004',
         phone: '081456789012',
         customerName: 'Agus Wijaya',
         customerType: 'household',
         address: 'Jl. Diponegoro No. 33, Teluk Betung',
         status: 'pending',
-        paymentMethod: 'cod',
+        paymentMethod: 'cash',
         paymentStatus: 'pending',
         estimatedPrice: 150000,
         finalPrice: null,
@@ -266,7 +266,7 @@ export default function Tracking() {
                                     type="text"
                                     placeholder={
                                         searchType === 'ticket'
-                                            ? 'Contoh: TKT-2026-0001'
+                                            ? 'Contoh: ORD-2026-0001'
                                             : 'Contoh: 081234567890'
                                     }
                                     value={searchQuery}
@@ -289,8 +289,8 @@ export default function Tracking() {
 
                         {/* Demo hint */}
                         <p className="text-xs text-muted-foreground">
-                            Demo: Coba cari TKT-2026-0001, TKT-2026-0002,
-                            TKT-2026-0003, atau TKT-2026-0004
+                            Demo: Coba cari ORD-2026-0001, ORD-2026-0002,
+                            ORD-2026-0003, atau ORD-2026-0004
                         </p>
                     </CardContent>
                 </Card>
@@ -394,8 +394,8 @@ export default function Tracking() {
                                             Metode Bayar
                                         </p>
                                         <p className="font-medium">
-                                            {order.paymentMethod === 'cod'
-                                                ? 'Bayar di Tempat (COD)'
+                                            {order.paymentMethod === 'cash'
+                                                ? 'Bayar di Tempat (Tunai)'
                                                 : 'Transfer Bank'}
                                         </p>
                                     </div>

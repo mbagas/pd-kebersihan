@@ -146,7 +146,8 @@ export interface DispatchOrder {
     customer_address: string;
     customer_phone: string;
     customer_npwp?: string;
-    volume: number;
+    volume_estimate: number;
+    volume_actual?: number;
     status: 'pending' | 'assigned' | 'on_the_way' | 'arrived' | 'processing' | 'done' | 'cancelled';
     // Payment fields
     payment_method: PaymentMethod;
@@ -163,7 +164,22 @@ export interface DispatchOrder {
     notes?: string;
     latitude?: number;
     longitude?: number;
+    // Evidence
+    evidence?: {
+        before?: string[];
+        after?: string[];
+    };
+    // GPS
+    gps_arrival?: {
+        lat?: number;
+        lng?: number;
+        validated?: boolean;
+    };
+    // Timestamps
     scheduled_at?: string;
+    assigned_at?: string;
+    started_at?: string;
+    arrived_at?: string;
     completed_at?: string;
     created_at: string;
     updated_at: string;
