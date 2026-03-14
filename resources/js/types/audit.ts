@@ -1,3 +1,14 @@
+import type { PaymentMethod } from './admin';
+import type {
+    ArmadaSummary,
+    Evidence,
+    GpsArrival,
+    MitraSummary,
+    OrderStatus,
+    PaymentStatus,
+    PetugasSummary,
+} from './order';
+
 /**
  * Audit Dashboard Types
  */
@@ -46,7 +57,7 @@ export interface MapOrder {
     volume_estimate: number;
     volume_actual?: number;
     total_amount: number;
-    status: string;
+    status: OrderStatus;
     created_at: string;
 }
 
@@ -109,36 +120,15 @@ export interface AuditOrder {
     volume_estimate: number;
     volume_actual?: number;
     total_amount: number;
-    status: string;
-    payment_method: 'cash' | 'transfer';
-    payment_status: string;
+    status: OrderStatus;
+    payment_method: PaymentMethod;
+    payment_status: PaymentStatus;
     latitude?: number;
     longitude?: number;
-    petugas?: {
-        id: number;
-        nama: string;
-        kontak: string;
-        mitra_id: number;
-        mitra?: {
-            id: number;
-            nama: string;
-            tipe: string;
-        };
-    };
-    armada?: {
-        id: number;
-        plat_nomor: string;
-        kapasitas: number;
-    };
-    evidence?: {
-        before?: string[];
-        after?: string[];
-    };
-    gps_arrival?: {
-        lat?: number;
-        lng?: number;
-        validated?: boolean;
-    };
+    petugas?: PetugasSummary & { mitra?: MitraSummary };
+    armada?: ArmadaSummary;
+    evidence?: Evidence;
+    gps_arrival?: GpsArrival;
     notes?: string;
     created_at: string;
     scheduled_at?: string;

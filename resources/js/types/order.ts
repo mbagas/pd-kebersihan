@@ -72,6 +72,40 @@ export const PARTNER_TYPE_LABELS: Record<PartnerType, string> = {
 };
 
 /**
+ * Shared relation subtypes (lightweight versions sent by backend)
+ */
+export interface MitraSummary {
+    id: number;
+    nama: string;
+    tipe: string;
+}
+
+export interface PetugasSummary {
+    id: number;
+    nama: string;
+    kontak: string;
+    mitra_id: number;
+    mitra?: MitraSummary;
+}
+
+export interface ArmadaSummary {
+    id: number;
+    plat_nomor: string;
+    kapasitas: number;
+}
+
+export interface Evidence {
+    before?: string[];
+    after?: string[];
+}
+
+export interface GpsArrival {
+    lat?: number;
+    lng?: number;
+    validated?: boolean;
+}
+
+/**
  * Order Interface
  */
 export interface Order {

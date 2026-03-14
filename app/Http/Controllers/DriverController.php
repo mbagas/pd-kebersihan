@@ -124,7 +124,9 @@ class DriverController extends Controller
      */
     public function updateStatus(Request $request, string $id)
     {
-        // In real implementation, this would update the database
+        // TODO: Implement actual status update - validate status, update DB, notify customer
+        $request->validate(['status' => ['required', 'in:on_the_way,arrived,processing']]);
+
         return back()->with('success', 'Status berhasil diperbarui');
     }
 
@@ -133,11 +135,7 @@ class DriverController extends Controller
      */
     public function complete(Request $request, string $id)
     {
-        // In real implementation, this would:
-        // 1. Validate photos
-        // 2. Save volume actual
-        // 3. Calculate total
-        // 4. Update payment status
+        // TODO: Implement completion - validate photos, save volume_actual, calculate total, update payment status
         return redirect()->route('driver.tugas')->with('success', 'Tugas berhasil diselesaikan');
     }
 }

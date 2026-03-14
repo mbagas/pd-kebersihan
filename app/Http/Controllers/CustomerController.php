@@ -331,6 +331,11 @@ class CustomerController extends Controller
      */
     public function uploadPaymentProof(Request $request, string $order)
     {
+        $request->validate([
+            'payment_proof' => ['required', 'image', 'max:2048'],
+        ]);
+
+        // TODO: Store file and update order payment_status to pending_verification
         return back()->with('success', 'Bukti pembayaran berhasil diunggah');
     }
 }

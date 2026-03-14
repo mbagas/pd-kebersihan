@@ -3,7 +3,14 @@
  */
 
 import type { PaymentMethod } from './admin';
-import type { CustomerType, OrderStatus, PaymentStatus } from './order';
+import type {
+    ArmadaSummary,
+    CustomerType,
+    Evidence,
+    OrderStatus,
+    PaymentStatus,
+    PetugasSummary,
+} from './order';
 
 /**
  * Customer Profile
@@ -60,27 +67,10 @@ export interface CustomerOrder {
     started_at?: string;
     completed_at?: string;
     created_at: string;
-    petugas?: {
-        id: number;
-        nama: string;
-        kontak: string;
-        mitra_id: number;
-        mitra?: {
-            id: number;
-            nama: string;
-            tipe: string;
-        };
-    };
-    armada?: {
-        id: number;
-        plat_nomor: string;
-        kapasitas: number;
-    };
-    evidence?: {
-        before?: string[];
-        after?: string[];
-    };
-    payment_proof?: string;
+    petugas?: PetugasSummary;
+    armada?: ArmadaSummary;
+    evidence?: Evidence;
+    bukti_transfer?: string;
 }
 
 /**

@@ -125,7 +125,7 @@ export default function OrderShow({ order }: Props) {
     const showTransferUpload =
         order.payment_method === 'transfer' &&
         order.payment_status === 'unpaid' &&
-        !order.payment_proof;
+        !order.bukti_transfer;
 
     return (
         <CustomerLayout>
@@ -487,7 +487,7 @@ export default function OrderShow({ order }: Props) {
                         )}
 
                         {/* Existing payment proof */}
-                        {order.payment_proof && (
+                        {order.bukti_transfer && (
                             <div className="flex items-center gap-2 rounded-lg bg-green-50 p-3 text-sm text-green-700">
                                 <CheckCircle2 className="h-4 w-4 shrink-0" />
                                 Bukti transfer sudah dikirim
