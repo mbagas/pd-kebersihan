@@ -28,8 +28,8 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
  */
 export const PAYMENT_STATUS = {
     UNPAID: 'unpaid',
+    PENDING_VERIFICATION: 'pending_verification',
     PAID: 'paid',
-    DEPOSIT_HELD: 'deposit_held',
 } as const;
 
 export type PaymentStatus =
@@ -37,8 +37,8 @@ export type PaymentStatus =
 
 export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
     [PAYMENT_STATUS.UNPAID]: 'Belum Bayar',
+    [PAYMENT_STATUS.PENDING_VERIFICATION]: 'Menunggu Verifikasi',
     [PAYMENT_STATUS.PAID]: 'Lunas',
-    [PAYMENT_STATUS.DEPOSIT_HELD]: 'Deposit',
 };
 
 /**

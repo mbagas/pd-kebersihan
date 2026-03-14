@@ -1,3 +1,5 @@
+import type { PaymentStatus } from './order';
+
 /**
  * Mitra (Partner) Types
  */
@@ -97,22 +99,13 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
 };
 
 /**
- * Payment Status Types (for order)
+ * Payment Status Types (re-exported from order.ts for convenience)
  */
-export const PAYMENT_STATUS = {
-    UNPAID: 'unpaid',
-    PENDING_VERIFICATION: 'pending_verification', // Transfer uploaded, waiting admin
-    PAID: 'paid',
-} as const;
-
-export type PaymentStatus =
-    (typeof PAYMENT_STATUS)[keyof typeof PAYMENT_STATUS];
-
-export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
-    [PAYMENT_STATUS.UNPAID]: 'Belum Bayar',
-    [PAYMENT_STATUS.PENDING_VERIFICATION]: 'Menunggu Verifikasi',
-    [PAYMENT_STATUS.PAID]: 'Lunas',
-};
+export {
+    PAYMENT_STATUS,
+    PAYMENT_STATUS_LABELS,
+} from './order';
+export type { PaymentStatus };
 
 /**
  * Cash Collection Status (for cash payment orders)

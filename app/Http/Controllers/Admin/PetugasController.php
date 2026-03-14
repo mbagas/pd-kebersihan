@@ -77,6 +77,10 @@ class PetugasController extends Controller
     {
         $petugas = collect(MockData::petugas())->firstWhere('id', (int) $id);
 
+        if (! $petugas) {
+            abort(404);
+        }
+
         return Inertia::render('Admin/Master/Petugas/Show', [
             'petugas' => $petugas,
         ]);
@@ -85,6 +89,10 @@ class PetugasController extends Controller
     public function edit(string $id): Response
     {
         $petugas = collect(MockData::petugas())->firstWhere('id', (int) $id);
+
+        if (! $petugas) {
+            abort(404);
+        }
 
         return Inertia::render('Admin/Master/Petugas/Edit', [
             'petugas' => $petugas,

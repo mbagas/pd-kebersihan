@@ -26,91 +26,98 @@ import { Separator } from '@/components/ui/separator';
 import PublicLayout from '@/layouts/PublicLayout';
 import { cn } from '@/lib/utils';
 
-// Mock data untuk demo
+// Mock data untuk demo (canonical field names matching MockData.php)
 const MOCK_ORDERS = [
     {
-        ticket: 'ORD-2026-0001',
-        phone: '081234567890',
-        customerName: 'Budi Santoso',
-        customerType: 'household',
-        address: 'Jl. Raden Intan No. 45, Tanjung Karang',
+        order_number: 'ORD-2026-0001',
+        customer_phone: '081234567890',
+        customer_name: 'Budi Santoso',
+        customer_type: 'household',
+        customer_address: 'Jl. Raden Intan No. 45, Tanjung Karang',
         status: 'done',
-        paymentMethod: 'cash',
-        paymentStatus: 'paid',
-        estimatedPrice: 150000,
-        finalPrice: 150000,
-        createdAt: '2026-02-13T08:00:00',
-        assignedAt: '2026-02-13T09:00:00',
-        processedAt: '2026-02-13T10:30:00',
-        completedAt: '2026-02-13T12:00:00',
-        officer: {
-            name: 'Ahmad Supardi',
-            phone: '081298765432',
+        payment_method: 'cash',
+        payment_status: 'paid',
+        total_amount: 150000,
+        volume_estimate: 1.5,
+        created_at: '2026-02-13T08:00:00',
+        assigned_at: '2026-02-13T09:00:00',
+        started_at: '2026-02-13T10:30:00',
+        completed_at: '2026-02-13T12:00:00',
+        petugas: {
+            nama: 'Ahmad Supardi',
+            kontak: '081298765432',
         },
     },
     {
-        ticket: 'ORD-2026-0002',
-        phone: '081298765432',
-        customerName: 'PT. Maju Jaya',
-        customerType: 'institution',
-        address: 'Jl. Kartini No. 88, Pahoman',
+        order_number: 'ORD-2026-0002',
+        customer_phone: '081298765432',
+        customer_name: 'PT. Maju Jaya',
+        customer_type: 'institution',
+        customer_address: 'Jl. Kartini No. 88, Pahoman',
         status: 'processing',
-        paymentMethod: 'transfer',
-        paymentStatus: 'pending',
-        estimatedPrice: 600000,
-        finalPrice: null,
-        createdAt: '2026-02-14T10:00:00',
-        assignedAt: '2026-02-14T11:00:00',
-        processedAt: '2026-02-15T08:00:00',
-        completedAt: null,
-        officer: {
-            name: 'Dedi Kurniawan',
-            phone: '081387654321',
+        payment_method: 'transfer',
+        payment_status: 'unpaid',
+        total_amount: 600000,
+        volume_estimate: 4,
+        created_at: '2026-02-14T10:00:00',
+        assigned_at: '2026-02-14T11:00:00',
+        started_at: '2026-02-15T08:00:00',
+        completed_at: null,
+        petugas: {
+            nama: 'Dedi Kurniawan',
+            kontak: '081387654321',
         },
     },
     {
-        ticket: 'ORD-2026-0003',
-        phone: '081345678901',
-        customerName: 'Siti Aminah',
-        customerType: 'household',
-        address: 'Jl. Teuku Umar No. 12, Kedaton',
+        order_number: 'ORD-2026-0003',
+        customer_phone: '081345678901',
+        customer_name: 'Siti Aminah',
+        customer_type: 'household',
+        customer_address: 'Jl. Teuku Umar No. 12, Kedaton',
         status: 'assigned',
-        paymentMethod: 'transfer',
-        paymentStatus: 'pending',
-        estimatedPrice: 150000,
-        finalPrice: null,
-        createdAt: '2026-02-15T07:00:00',
-        assignedAt: '2026-02-15T08:30:00',
-        processedAt: null,
-        completedAt: null,
-        officer: {
-            name: 'Rudi Hartono',
-            phone: '081376543210',
+        payment_method: 'transfer',
+        payment_status: 'unpaid',
+        total_amount: 150000,
+        volume_estimate: 1.5,
+        created_at: '2026-02-15T07:00:00',
+        assigned_at: '2026-02-15T08:30:00',
+        started_at: null,
+        completed_at: null,
+        petugas: {
+            nama: 'Rudi Hartono',
+            kontak: '081376543210',
         },
     },
     {
-        ticket: 'ORD-2026-0004',
-        phone: '081456789012',
-        customerName: 'Agus Wijaya',
-        customerType: 'household',
-        address: 'Jl. Diponegoro No. 33, Teluk Betung',
+        order_number: 'ORD-2026-0004',
+        customer_phone: '081456789012',
+        customer_name: 'Agus Wijaya',
+        customer_type: 'household',
+        customer_address: 'Jl. Diponegoro No. 33, Teluk Betung',
         status: 'pending',
-        paymentMethod: 'cash',
-        paymentStatus: 'pending',
-        estimatedPrice: 150000,
-        finalPrice: null,
-        createdAt: '2026-02-15T09:00:00',
-        assignedAt: null,
-        processedAt: null,
-        completedAt: null,
-        officer: null,
+        payment_method: 'cash',
+        payment_status: 'unpaid',
+        total_amount: 150000,
+        volume_estimate: 1.5,
+        created_at: '2026-02-15T09:00:00',
+        assigned_at: null,
+        started_at: null,
+        completed_at: null,
+        petugas: null,
     },
 ];
 
-type OrderStatus = 'pending' | 'assigned' | 'processing' | 'done';
+type TrackingStatus =
+    | 'pending'
+    | 'assigned'
+    | 'on_the_way'
+    | 'arrived'
+    | 'processing'
+    | 'done'
+    | 'cancelled';
 
 const STATUS_CONFIG: Record<
-    OrderStatus,
+    TrackingStatus,
     { label: string; color: string; bgColor: string }
 > = {
     pending: {
@@ -123,6 +130,16 @@ const STATUS_CONFIG: Record<
         color: 'text-blue-600',
         bgColor: 'bg-blue-100',
     },
+    on_the_way: {
+        label: 'Dalam Perjalanan',
+        color: 'text-cyan-600',
+        bgColor: 'bg-cyan-100',
+    },
+    arrived: {
+        label: 'Sampai Lokasi',
+        color: 'text-indigo-600',
+        bgColor: 'bg-indigo-100',
+    },
     processing: {
         label: 'Diproses',
         color: 'text-purple-600',
@@ -133,22 +150,35 @@ const STATUS_CONFIG: Record<
         color: 'text-green-600',
         bgColor: 'bg-green-100',
     },
+    cancelled: {
+        label: 'Dibatalkan',
+        color: 'text-red-600',
+        bgColor: 'bg-red-100',
+    },
 };
 
-const TIMELINE_STEPS: { key: OrderStatus; label: string; icon: typeof Clock }[] = [
+const TIMELINE_STEPS: {
+    key: TrackingStatus;
+    label: string;
+    icon: typeof Clock;
+}[] = [
     { key: 'pending', label: 'Pesanan Diterima', icon: Clock },
     { key: 'assigned', label: 'Petugas Ditugaskan', icon: User },
+    { key: 'on_the_way', label: 'Dalam Perjalanan', icon: Truck },
+    { key: 'arrived', label: 'Sampai Lokasi', icon: MapPin },
     { key: 'processing', label: 'Sedang Diproses', icon: Truck },
     { key: 'done', label: 'Selesai', icon: CheckCircle2 },
 ];
 
-function getStatusIndex(status: OrderStatus): number {
+function getStatusIndex(status: TrackingStatus): number {
     return TIMELINE_STEPS.findIndex((s) => s.key === status);
 }
 
 export default function Tracking() {
     const [searchQuery, setSearchQuery] = useState('');
-    const [searchType, setSearchType] = useState<'ticket' | 'phone'>('ticket');
+    const [searchType, setSearchType] = useState<'order_number' | 'phone'>(
+        'order_number',
+    );
     const [order, setOrder] = useState<(typeof MOCK_ORDERS)[0] | null>(null);
     const [notFound, setNotFound] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
@@ -163,9 +193,11 @@ export default function Tracking() {
         // Simulate API call
         setTimeout(() => {
             const found = MOCK_ORDERS.find((o) =>
-                searchType === 'ticket'
-                    ? o.ticket.toLowerCase() === searchQuery.toLowerCase()
-                    : o.phone === searchQuery.replace(/\D/g, ''),
+                searchType === 'order_number'
+                    ? o.order_number.toLowerCase() ===
+                      searchQuery.toLowerCase()
+                    : o.customer_phone ===
+                      searchQuery.replace(/\D/g, ''),
             );
 
             if (found) {
@@ -208,7 +240,7 @@ export default function Tracking() {
             <div className="container mx-auto px-4 py-8">
                 <PageHeader
                     title="Lacak Pesanan"
-                    description="Masukkan nomor tiket atau nomor HP untuk melacak pesanan Anda"
+                    description="Masukkan nomor pesanan atau nomor HP untuk melacak pesanan Anda"
                     breadcrumbs={[
                         { label: 'Beranda', href: '/' },
                         { label: 'Lacak Pesanan' },
@@ -220,7 +252,7 @@ export default function Tracking() {
                     <CardHeader>
                         <CardTitle>Cari Pesanan</CardTitle>
                         <CardDescription>
-                            Masukkan nomor tiket atau nomor HP yang terdaftar
+                            Masukkan nomor pesanan atau nomor HP yang terdaftar
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -229,17 +261,17 @@ export default function Tracking() {
                             <Button
                                 type="button"
                                 variant={
-                                    searchType === 'ticket'
+                                    searchType === 'order_number'
                                         ? 'default'
                                         : 'outline'
                                 }
                                 size="sm"
                                 onClick={() => {
-                                    setSearchType('ticket');
+                                    setSearchType('order_number');
                                     setSearchQuery('');
                                 }}
                             >
-                                Nomor Tiket
+                                Nomor Pesanan
                             </Button>
                             <Button
                                 type="button"
@@ -265,7 +297,7 @@ export default function Tracking() {
                                 <Input
                                     type="text"
                                     placeholder={
-                                        searchType === 'ticket'
+                                        searchType === 'order_number'
                                             ? 'Contoh: ORD-2026-0001'
                                             : 'Contoh: 081234567890'
                                     }
@@ -300,7 +332,7 @@ export default function Tracking() {
                     <Card className="mt-6 border-destructive/50">
                         <CardContent className="py-8 text-center">
                             <p className="text-muted-foreground">
-                                Pesanan tidak ditemukan. Pastikan nomor tiket
+                                Pesanan tidak ditemukan. Pastikan nomor pesanan
                                 atau nomor HP yang Anda masukkan benar.
                             </p>
                             <Button asChild variant="link" className="mt-2">
@@ -319,27 +351,27 @@ export default function Tracking() {
                                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                     <div>
                                         <CardTitle className="text-lg">
-                                            {order.ticket}
+                                            {order.order_number}
                                         </CardTitle>
                                         <CardDescription>
-                                            {order.customerName}
+                                            {order.customer_name}
                                         </CardDescription>
                                     </div>
                                     <span
                                         className={cn(
                                             'inline-flex w-fit items-center rounded-full px-3 py-1 text-sm font-medium',
                                             STATUS_CONFIG[
-                                                order.status as OrderStatus
-                                            ].bgColor,
+                                                order.status as TrackingStatus
+                                            ]?.bgColor,
                                             STATUS_CONFIG[
-                                                order.status as OrderStatus
-                                            ].color,
+                                                order.status as TrackingStatus
+                                            ]?.color,
                                         )}
                                     >
                                         {
                                             STATUS_CONFIG[
-                                                order.status as OrderStatus
-                                            ].label
+                                                order.status as TrackingStatus
+                                            ]?.label ?? order.status
                                         }
                                     </span>
                                 </div>
@@ -353,7 +385,7 @@ export default function Tracking() {
                                                 Alamat
                                             </p>
                                             <p className="text-sm text-muted-foreground">
-                                                {order.address}
+                                                {order.customer_address}
                                             </p>
                                         </div>
                                     </div>
@@ -364,7 +396,7 @@ export default function Tracking() {
                                                 Telepon
                                             </p>
                                             <p className="text-sm text-muted-foreground">
-                                                {order.phone}
+                                                {order.customer_phone}
                                             </p>
                                         </div>
                                     </div>
@@ -375,18 +407,18 @@ export default function Tracking() {
                                 <div className="grid gap-4 text-sm sm:grid-cols-3">
                                     <div>
                                         <p className="text-muted-foreground">
-                                            Estimasi Biaya
+                                            Total
                                         </p>
                                         <p className="font-medium">
-                                            {formatCurrency(order.estimatedPrice)}
+                                            {formatCurrency(order.total_amount)}
                                         </p>
                                     </div>
                                     <div>
                                         <p className="text-muted-foreground">
-                                            Biaya Final
+                                            Volume Estimasi
                                         </p>
                                         <p className="font-medium">
-                                            {formatCurrency(order.finalPrice)}
+                                            {order.volume_estimate} m&sup3;
                                         </p>
                                     </div>
                                     <div>
@@ -394,7 +426,7 @@ export default function Tracking() {
                                             Metode Bayar
                                         </p>
                                         <p className="font-medium">
-                                            {order.paymentMethod === 'cash'
+                                            {order.payment_method === 'cash'
                                                 ? 'Bayar di Tempat (Tunai)'
                                                 : 'Transfer Bank'}
                                         </p>
@@ -414,7 +446,7 @@ export default function Tracking() {
                                 <div className="relative">
                                     {TIMELINE_STEPS.map((step, index) => {
                                         const currentIndex = getStatusIndex(
-                                            order.status as OrderStatus,
+                                            order.status as TrackingStatus,
                                         );
                                         const isCompleted = index <= currentIndex;
                                         const isCurrent = index === currentIndex;
@@ -422,13 +454,13 @@ export default function Tracking() {
 
                                         let timestamp: string | null = null;
                                         if (step.key === 'pending')
-                                            timestamp = order.createdAt;
+                                            timestamp = order.created_at;
                                         if (step.key === 'assigned')
-                                            timestamp = order.assignedAt;
+                                            timestamp = order.assigned_at;
                                         if (step.key === 'processing')
-                                            timestamp = order.processedAt;
+                                            timestamp = order.started_at;
                                         if (step.key === 'done')
-                                            timestamp = order.completedAt;
+                                            timestamp = order.completed_at;
 
                                         return (
                                             <div
@@ -493,7 +525,7 @@ export default function Tracking() {
                         </Card>
 
                         {/* Officer Info */}
-                        {order.officer && (
+                        {order.petugas && (
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="text-lg">
@@ -507,7 +539,7 @@ export default function Tracking() {
                                         </div>
                                         <div>
                                             <p className="font-medium">
-                                                {order.officer.name}
+                                                {order.petugas.nama}
                                             </p>
                                             <p className="text-sm text-muted-foreground">
                                                 Petugas Lapangan
@@ -519,8 +551,8 @@ export default function Tracking() {
                         )}
 
                         {/* Payment Proof Upload (for Transfer) */}
-                        {order.paymentMethod === 'transfer' &&
-                            order.paymentStatus === 'pending' &&
+                        {order.payment_method === 'transfer' &&
+                            order.payment_status === 'unpaid' &&
                             order.status !== 'done' && (
                                 <Card>
                                     <CardHeader>

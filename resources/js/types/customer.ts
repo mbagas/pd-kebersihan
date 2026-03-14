@@ -2,8 +2,8 @@
  * Customer Portal Types
  */
 
-import type { CustomerType, OrderStatus, PaymentStatus } from './order';
 import type { PaymentMethod } from './admin';
+import type { CustomerType, OrderStatus, PaymentStatus } from './order';
 
 /**
  * Customer Profile

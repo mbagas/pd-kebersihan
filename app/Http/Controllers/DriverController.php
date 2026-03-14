@@ -52,7 +52,7 @@ class DriverController extends Controller
         return Inertia::render('Driver/Tugas/Show', [
             'task' => $task,
             'tarif' => $tarifMap[$task['customer_type']],
-            'armadaKapasitas' => $task['armada']['kapasitas'] ?? 6,
+            'armadaKapasitas' => $task['armada'] ? $task['armada']['kapasitas'] : null,
         ]);
     }
 

@@ -3,7 +3,6 @@
 namespace App\Actions;
 
 use App\Models\User;
-use App\Support\MockData;
 
 class StoreOrder
 {
@@ -42,9 +41,11 @@ class StoreOrder
      */
     public static function tariff(): array
     {
-        // Uses shared MockData tariff as single source of truth
         // TODO: Fetch tariff from database (Issue #16)
-        return MockData::tarifMap();
+        return [
+            'household' => 150000,
+            'institution' => 200000,
+        ];
     }
 
     /**
