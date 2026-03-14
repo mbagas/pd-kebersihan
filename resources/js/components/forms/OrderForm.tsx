@@ -30,7 +30,7 @@ interface MapLocation {
     address?: string;
 }
 
-type PaymentMethod = 'cod' | 'transfer';
+type PaymentMethod = 'cash' | 'transfer';
 
 interface OrderFormData {
     customer_type: CustomerType;
@@ -65,14 +65,14 @@ interface OrderFormProps {
 }
 
 const DEFAULT_TARIFF: Tariff = {
-    household: 150000,
-    institution: 200000,
+    household: 100000,
+    institution: 150000,
 };
 
 const PAYMENT_OPTIONS = [
     {
-        value: 'cod' as PaymentMethod,
-        label: 'Bayar di Tempat (COD)',
+        value: 'cash' as PaymentMethod,
+        label: 'Bayar di Tempat (Tunai)',
         description: 'Bayar tunai saat petugas datang',
         icon: Banknote,
     },
@@ -149,7 +149,7 @@ export function OrderForm({
         business_type: profile?.business_type ?? '',
         estimated_volume: prefill?.estimated_volume ?? 0,
         has_grease_trap: false,
-        payment_method: prefill?.payment_method ?? 'cod',
+        payment_method: prefill?.payment_method ?? 'cash',
         notes: prefill?.notes ?? '',
         save_address: false,
         address_label: '',

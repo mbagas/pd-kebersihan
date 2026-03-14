@@ -28,8 +28,8 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
  */
 export const PAYMENT_STATUS = {
     UNPAID: 'unpaid',
+    PENDING_VERIFICATION: 'pending_verification',
     PAID: 'paid',
-    DEPOSIT_HELD: 'deposit_held',
 } as const;
 
 export type PaymentStatus =
@@ -37,8 +37,8 @@ export type PaymentStatus =
 
 export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
     [PAYMENT_STATUS.UNPAID]: 'Belum Bayar',
+    [PAYMENT_STATUS.PENDING_VERIFICATION]: 'Menunggu Verifikasi',
     [PAYMENT_STATUS.PAID]: 'Lunas',
-    [PAYMENT_STATUS.DEPOSIT_HELD]: 'Deposit',
 };
 
 /**
@@ -72,6 +72,40 @@ export const PARTNER_TYPE_LABELS: Record<PartnerType, string> = {
 };
 
 /**
+ * Shared relation subtypes (lightweight versions sent by backend)
+ */
+export interface MitraSummary {
+    id: number;
+    nama: string;
+    tipe: string;
+}
+
+export interface PetugasSummary {
+    id: number;
+    nama: string;
+    kontak: string;
+    mitra_id: number;
+    mitra?: MitraSummary;
+}
+
+export interface ArmadaSummary {
+    id: number;
+    plat_nomor: string;
+    kapasitas: number;
+}
+
+export interface Evidence {
+    before?: string[];
+    after?: string[];
+}
+
+export interface GpsArrival {
+    lat?: number;
+    lng?: number;
+    validated?: boolean;
+}
+
+/**
  * Order Interface
  */
 export interface Order {
@@ -102,6 +136,6 @@ export interface OrderFormPrefill {
     phone?: string;
     address?: string;
     estimated_volume?: number;
-    payment_method?: 'cod' | 'transfer';
+    payment_method?: 'cash' | 'transfer';
     notes?: string;
 }

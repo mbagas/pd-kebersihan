@@ -1,3 +1,14 @@
+import type { PaymentMethod } from './admin';
+import type {
+    ArmadaSummary,
+    Evidence,
+    GpsArrival,
+    MitraSummary,
+    OrderStatus,
+    PaymentStatus,
+    PetugasSummary,
+} from './order';
+
 /**
  * Audit Dashboard Types
  */
@@ -43,9 +54,10 @@ export interface MapOrder {
     customer_address: string;
     latitude: number;
     longitude: number;
-    volume: number;
+    volume_estimate: number;
+    volume_actual?: number;
     total_amount: number;
-    status: string;
+    status: OrderStatus;
     created_at: string;
 }
 
@@ -97,12 +109,6 @@ export interface KeuanganData {
 /**
  * Audit Trail Types
  */
-export interface OrderTimeline {
-    assigned_at?: string;
-    arrived_at?: string;
-    completed_at?: string;
-}
-
 export interface AuditOrder {
     id: number;
     order_number: string;
@@ -110,23 +116,25 @@ export interface AuditOrder {
     customer_type: 'household' | 'institution';
     customer_address: string;
     customer_phone: string;
-    volume: number;
+    customer_npwp?: string;
+    volume_estimate: number;
+    volume_actual?: number;
     total_amount: number;
-    status: string;
-    payment_method: 'cash' | 'transfer';
-    payment_status: string;
+    status: OrderStatus;
+    payment_method: PaymentMethod;
+    payment_status: PaymentStatus;
     latitude?: number;
     longitude?: number;
-    petugas_nama?: string;
-    mitra_nama?: string;
-    armada_plat?: string;
-    foto_before?: string;
-    foto_after?: string;
-    timeline: OrderTimeline;
-    gps_validated: boolean;
+    petugas?: PetugasSummary & { mitra?: MitraSummary };
+    armada?: ArmadaSummary;
+    evidence?: Evidence;
+    gps_arrival?: GpsArrival;
     notes?: string;
     created_at: string;
     scheduled_at?: string;
+    assigned_at?: string;
+    started_at?: string;
+    arrived_at?: string;
     completed_at?: string;
 }
 

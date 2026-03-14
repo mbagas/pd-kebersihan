@@ -77,7 +77,7 @@ export default function Orders({ orders }: Props) {
             const q = debouncedSearch.toLowerCase();
             result = result.filter(
                 (o) =>
-                    o.ticket_number.toLowerCase().includes(q) ||
+                    o.order_number.toLowerCase().includes(q) ||
                     o.customer_address.toLowerCase().includes(q),
             );
         }

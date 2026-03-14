@@ -33,6 +33,8 @@ interface Props {
 const STATUS_COLORS: Record<string, string> = {
     pending: 'bg-yellow-100 text-yellow-800',
     assigned: 'bg-blue-100 text-blue-800',
+    on_the_way: 'bg-violet-100 text-violet-800',
+    arrived: 'bg-indigo-100 text-indigo-800',
     processing: 'bg-purple-100 text-purple-800',
     done: 'bg-green-100 text-green-800',
     cancelled: 'bg-red-100 text-red-800',
@@ -41,6 +43,8 @@ const STATUS_COLORS: Record<string, string> = {
 const STATUS_LABELS: Record<string, string> = {
     pending: 'Pending',
     assigned: 'Ditugaskan',
+    on_the_way: 'Dalam Perjalanan',
+    arrived: 'Tiba di Lokasi',
     processing: 'Diproses',
     done: 'Selesai',
     cancelled: 'Dibatalkan',
@@ -256,7 +260,7 @@ export default function Dashboard({ stats, weeklyChart, recentOrders }: Props) {
                                                 )}
                                             </p>
                                             <p className="text-sm text-muted-foreground">
-                                                {order.volume} m³
+                                                {order.volume_actual ?? order.volume_estimate} m³
                                             </p>
                                         </div>
                                     </div>

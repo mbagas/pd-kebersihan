@@ -27,7 +27,7 @@ class StoreOrder
             'business_type' => ['nullable', 'string', 'max:255'],
             'estimated_volume' => ['nullable', 'numeric', 'min:0'],
             'has_grease_trap' => ['nullable', 'boolean'],
-            'payment_method' => ['required', 'in:cod,transfer'],
+            'payment_method' => ['required', 'in:cash,transfer'],
             'notes' => ['nullable', 'string', 'max:500'],
             'save_address' => ['nullable', 'boolean'],
             'address_label' => ['nullable', 'required_if:save_address,true', 'string', 'max:50'],
@@ -35,7 +35,7 @@ class StoreOrder
     }
 
     /**
-     * Fetch the current tariff.
+     * Fetch the current tariff from the canonical source.
      *
      * @return array{household: int, institution: int}
      */

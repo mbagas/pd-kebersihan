@@ -2,8 +2,13 @@
  * Driver/Petugas Types for PWA
  */
 
-import type { Armada, Mitra, PaymentMethod } from './admin';
-import type { CustomerType } from './order';
+import type { Armada, CashCollectionStatus, Mitra, PaymentMethod } from './admin';
+import type {
+    ArmadaSummary,
+    CustomerType,
+    Evidence,
+    PaymentStatus,
+} from './order';
 
 /**
  * Driver Order Status - Extended for driver workflow
@@ -55,23 +60,27 @@ export interface DriverTask {
     notes?: string;
     // Payment
     payment_method: PaymentMethod;
+    payment_status: PaymentStatus;
+    cash_collection_status: CashCollectionStatus;
     total_amount: number;
     // Evidence
-    foto_sebelum?: string[];
-    foto_sesudah?: string[];
+    evidence?: Evidence;
     // GPS validation
-    gps_arrival_lat?: number;
-    gps_arrival_lng?: number;
-    gps_valid?: boolean;
-    gps_invalid_reason?: string;
+    gps_arrival?: {
+        lat?: number;
+        lng?: number;
+        validated?: boolean;
+        invalid_reason?: string;
+    };
     // Timestamps
     scheduled_at?: string;
+    assigned_at?: string;         // Ditugaskan
     started_at?: string;          // Mulai perjalanan
     arrived_at?: string;          // Sampai lokasi
     completed_at?: string;        // Selesai
     created_at: string;
     // Relations
-    armada?: Armada;
+    armada?: ArmadaSummary;
 }
 
 /**

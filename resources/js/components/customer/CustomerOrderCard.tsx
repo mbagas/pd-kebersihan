@@ -39,7 +39,7 @@ export function CustomerOrderCard({ order }: CustomerOrderCardProps) {
                         <div className="flex items-start justify-between">
                             <div>
                                 <p className="text-sm font-medium">
-                                    {order.ticket_number}
+                                    {order.order_number}
                                 </p>
                                 <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
                                     <Calendar className="h-3 w-3" />
@@ -66,7 +66,7 @@ export function CustomerOrderCard({ order }: CustomerOrderCardProps) {
                         <div className="flex w-full items-center justify-between">
                             <PaymentBadge status={order.payment_status} />
                             <span className="text-sm font-semibold text-primary">
-                                {formatCurrency(order.total_price)}
+                                {formatCurrency(order.total_amount)}
                             </span>
                         </div>
                     </CardFooter>
